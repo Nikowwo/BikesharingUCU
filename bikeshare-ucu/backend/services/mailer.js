@@ -1,38 +1,38 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 const CONTACT_TO = process.env.CONTACT_TO || 'nicolasgobbo2007@gmail.com';
 
-function createTransport() {
-  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+function getResend() {
+  if (!process.env.RESEND_API_KEY) {
+    return null;
   }
-  return null;
+
+  return new Resend(process.env.RESEND_API_KEY);
 }
 
 async function sendAdminEmail({ subject, text, html }) {
-  const transport = createTransport();
-  if (!transport) {
-    console.warn('[mailer] SMTP no configurado — email no enviado:', subject);
+  const resend = getResend();
+
+  if (!resend) {
+    console.warn('[mailer] RESEND_API_KEY no configurada');
     return { sent: false, to: CONTACT_TO };
   }
 
-  await transport.sendMail({
-    from: process.env.SMTP_FROM || process.env.SMTP_USER || 'bikeshare@ucu.edu.uy',
+  await resend.emails.send({
+    from: 'BikeShare UCU <onboarding@resend.dev>',
     to: CONTACT_TO,
     subject,
     text,
     html,
   });
 
-  return { sent: true, to: CONTACT_TO };
+  return {
+    sent: true,
+    to: CONTACT_TO,
+  };
 }
 
-module.exports = { CONTACT_TO, sendAdminEmail };
+module.exports = {
+  CONTACT_TO,
+  sendAdminEmail,
+};
