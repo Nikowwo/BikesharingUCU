@@ -1,0 +1,196 @@
+const crypto = require('crypto');
+const db = require('../db');
+
+const DEFAULT_BIKE_CODE = process.env.DEFAULT_BIKE_CODE || 'UCU-001';
+const CURRENT_SEMESTER = process.env.CURRENT_SEMESTER || '2026-S1';
+const API_PUBLIC_URL = (process.env.API_PUBLIC_URL || 'http://localhost:3001').replace(/\/$/, '');
+
+function getApproveSecret() {
+  return process.env.APPROVE_SECRET || process.env.JWT_SECRET || 'cambiar-en-produccion';
+}
+
+function signApplicationToken(applicationId) {
+  return crypto
+    .createHmac('sha256', getApproveSecret())
+    .update(`rental:${applicationId}`)
+    .digest('hex');
+}
+
+function verifyApplicationToken(applicationId, token) {
+  if (!applicationId || !token) return false;
+  const expected = signApplicationToken(applicationId);
+  try {
+    return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(token, 'hex'));
+  } catch {
+    return false;
+  }
+}
+
+function buildApproveUrl(applicationId) {
+  const token = signApplicationToken(applicationId);
+  return `${API_PUBLIC_URL}/api/contact/approve/${applicationId}?token=${token}`;
+}
+
+function buildRejectUrl(applicationId) {
+  const token = signApplicationToken(applicationId);
+  return `${API_PUBLIC_URL}/api/contact/reject/${applicationId}?token=${token}`;
+}
+
+async function ensureDefaultBike() {
+  await db.query(
+    `INSERT INTO bikes (code, model, status, current_lat, current_lng, last_gps_update)
+     SELECT ?, 'Mountain Bike UCU', 'available', -34.8893849, -56.1585772, NOW()
+     FROM DUAL
+     WHERE NOT EXISTS (SELECT 1 FROM bikes WHERE code = ?)`,
+    [DEFAULT_BIKE_CODE, DEFAULT_BIKE_CODE]
+  );
+
+  const [rows] = await db.query('SELECT id, code, status FROM bikes WHERE code = ? LIMIT 1', [
+    DEFAULT_BIKE_CODE,
+  ]);
+  return rows[0];
+}
+
+async function assignBikeFromApplication(applicationId) {
+  const [apps] = await db.query('SELECT * FROM rental_applications WHERE id = ? LIMIT 1', [
+    applicationId,
+  ]);
+  if (apps.length === 0) {
+    const err = new Error('Solicitud no encontrada');
+    err.code = 'NOT_FOUND';
+    throw err;
+  }
+
+  const application = apps[0];
+  if (application.status === 'approved') {
+    const [loan] = await db.query(
+      `SELECT l.id, b.code AS bike_code
+       FROM loans l
+       JOIN bikes b ON b.id = l.bike_id
+       WHERE l.user_id = ? AND l.status IN ('active', 'return_requested')
+       ORDER BY l.approval_date DESC
+       LIMIT 1`,
+      [application.user_id]
+    );
+    return {
+      alreadyApproved: true,
+      application,
+      bikeCode: loan[0]?.bike_code || DEFAULT_BIKE_CODE,
+      loanId: loan[0]?.id || null,
+    };
+  }
+
+  if (application.status === 'rejected') {
+    const err = new Error('Esta solicitud ya fue rechazada');
+    err.code = 'REJECTED';
+    throw err;
+  }
+
+  const [activeLoan] = await db.query(
+    `SELECT id FROM loans WHERE user_id = ? AND status IN ('active', 'return_requested') LIMIT 1`,
+    [application.user_id]
+  );
+  if (activeLoan.length > 0) {
+    const err = new Error('El usuario ya tiene una bici asignada');
+    err.code = 'HAS_BIKE';
+    throw err;
+  }
+
+  const bike = await ensureDefaultBike();
+  if (bike.status === 'loaned') {
+    const err = new Error(`La bici ${DEFAULT_BIKE_CODE} no está disponible`);
+    err.code = 'BIKE_UNAVAILABLE';
+    throw err;
+  }
+
+  await db.query(
+    `UPDATE rental_applications SET status = 'approved', reviewed_at = NOW() WHERE id = ?`,
+    [applicationId]
+  );
+
+  const [loanResult] = await db.query(
+    `INSERT INTO loans (bike_id, user_id, status, semester, approval_date)
+     VALUES (?, ?, 'active', ?, NOW())`,
+    [bike.id, application.user_id, CURRENT_SEMESTER]
+  );
+
+  await db.query("UPDATE bikes SET status = 'loaned' WHERE id = ?", [bike.id]);
+
+  return {
+    alreadyApproved: false,
+    application,
+    bikeCode: bike.code,
+    loanId: loanResult.insertId,
+  };
+}
+
+async function rejectApplication(applicationId) {
+  const [apps] = await db.query('SELECT * FROM rental_applications WHERE id = ? LIMIT 1', [
+    applicationId,
+  ]);
+  if (apps.length === 0) {
+    const err = new Error('Solicitud no encontrada');
+    err.code = 'NOT_FOUND';
+    throw err;
+  }
+
+  const application = apps[0];
+  if (application.status === 'approved') {
+    const err = new Error('No se puede rechazar: la solicitud ya fue aprobada');
+    err.code = 'ALREADY_APPROVED';
+    throw err;
+  }
+  if (application.status === 'rejected') {
+    return { alreadyRejected: true, application };
+  }
+
+  await db.query(
+    `UPDATE rental_applications SET status = 'rejected', reviewed_at = NOW() WHERE id = ?`,
+    [applicationId]
+  );
+
+  return { alreadyRejected: false, application };
+}
+
+function renderActionPage({ title, message, tone = 'info', actions = [] }) {
+  const colors = {
+    success: '#2d6a4f',
+    error: '#c1121f',
+    info: '#1b263b',
+  };
+  const accent = colors[tone] || colors.info;
+
+  const actionHtml = actions
+    .map(
+      (a) =>
+        `<a href="${a.href}" style="display:inline-block;margin:8px 8px 0 0;padding:12px 20px;background:${a.primary ? accent : '#6c757d'};color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">${a.label}</a>`
+    )
+    .join('');
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${title} — BikeShare UCU</title>
+</head>
+<body style="font-family:system-ui,sans-serif;background:#f8f5f0;margin:0;padding:32px 16px;">
+  <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;padding:28px;box-shadow:0 8px 24px rgba(0,0,0,.08);">
+    <h1 style="margin:0 0 12px;color:${accent};font-size:1.4rem;">${title}</h1>
+    <p style="margin:0;color:#333;line-height:1.5;">${message}</p>
+    ${actionHtml ? `<div style="margin-top:20px;">${actionHtml}</div>` : ''}
+  </div>
+</body>
+</html>`;
+}
+
+module.exports = {
+  API_PUBLIC_URL,
+  DEFAULT_BIKE_CODE,
+  buildApproveUrl,
+  buildRejectUrl,
+  verifyApplicationToken,
+  assignBikeFromApplication,
+  rejectApplication,
+  renderActionPage,
+};

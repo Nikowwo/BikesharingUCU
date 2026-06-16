@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scrollbar-gutter: stable;
+  background-color: #1b263b;
+  scrollbar-width: thin;
+  scrollbar-color: #4a5568 #1b263b;
+}
+
+body {
+  @apply font-inter text-ucu-navy antialiased bg-ucu-cream min-h-full;
+}
+
+::-webkit-scrollbar {
+  width: 14px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1b263b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4a5568;
+  border-radius: 8px;
+  border: 3px solid #1b263b;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5c6b82;
+}
+
+.leaflet-container {
+  font-family: 'Inter', sans-serif;
+  z-index: 0;
+}
+
+.bike-map-panel {
+  @apply flex flex-col flex-1 min-h-[380px];
+}
+
+.bike-map-wrap {
+  @apply relative flex-1 min-h-[380px] rounded-xl overflow-hidden border border-gray-200;
+}
+
+.bike-map-wrap .leaflet-container {
+  position: absolute;
+  inset: 0;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.input-field {
+  @apply w-full rounded-lg px-4 py-3 text-sm text-ucu-navy border outline-none transition-colors;
+  background-color: #ffffff;
+  border-color: #d1d5db;
+}
+
+.input-field::placeholder {
+  color: #9ca3af;
+}
+
+.input-field:focus {
+  border-color: #9ca3af;
+  box-shadow: none;
+}
+
+.input-underline {
+  @apply w-full bg-transparent border-b border-white/60 py-2 text-white placeholder:text-white/50 outline-none focus:border-white;
+}
+
+.btn-navy {
+  @apply bg-ucu-navy text-white font-medium px-6 py-2.5 rounded-md hover:bg-ucu-navy/90 transition-colors;
+}
+
+.page-bg-bikes {
+  background-color: #1b263b;
+  background-image: linear-gradient(rgba(27, 38, 59, 0.55), rgba(27, 38, 59, 0.55)),
+    url('/images/campus-bikes.webp');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.hero-campus {
+  background-image: linear-gradient(rgba(27, 38, 59, 0.5), rgba(27, 38, 59, 0.5)),
+    url('/images/campus-bikes.webp');
+  background-size: cover;
+  background-position: center;
+}
