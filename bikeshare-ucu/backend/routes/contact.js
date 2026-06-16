@@ -3,7 +3,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const db = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 const {
@@ -35,17 +35,9 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
-function createTransport() {
-  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+function getResend() {
+  if (process.env.RESEND_API_KEY) {
+    return new Resend(process.env.RESEND_API_KEY);
   }
   return null;
 }
@@ -334,18 +326,24 @@ Fecha: ${new Date().toLocaleString('es-UY')}
         : [],
     };
 
-    const transport = createTransport();
+    const resend = getResend();
     let emailSent = false;
     let emailNote = '';
 
-    if (transport) {
+    if (resend) {
       try {
-        await transport.sendMail(mailOptions);
+        await resend.emails.send({
+          from: 'BikeShare UCU <onboarding@resend.dev>',
+          to: CONTACT_TO,
+          subject,
+          html: htmlBody,
+          text: body,
+        });
         emailSent = true;
         emailNote = `Email enviado a ${CONTACT_TO}`;
       } catch (mailErr) {
         console.error('[contact/rental] sendMail:', mailErr.message);
-        emailNote = `No se pudo enviar el email: ${mailErr.message}. Revisá SMTP_PASS en backend/.env`;
+        emailNote = `No se pudo enviar el email: ${mailErr.message}`;
       }
     } else {
       const logPath = path.join(uploadDir, `request-${Date.now()}.txt`);
