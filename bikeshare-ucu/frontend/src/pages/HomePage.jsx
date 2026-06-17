@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -6,7 +6,6 @@ import AppLayout from '../layouts/AppLayout';
 import BrandLogo from '../components/BrandLogo';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
-import { TERMS_SECTIONS } from '../data/terms';
 
 const EMPTY_FORM = { full_name: '', ci: '', email: '' };
 
@@ -16,22 +15,13 @@ export default function HomePage() {
   const [file, setFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (window.location.hash === '#terminos') {
-      const timer = setTimeout(() => {
-        document.getElementById('terminos')?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
   }
   if (!user) return <Navigate to="/" replace />;
 
-  const scrollToTerms = () => {
-    document.getElementById('terminos')?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToForm = () => {
+    document.getElementById('formulario')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleSubmit = async (e) => {
@@ -75,7 +65,7 @@ export default function HomePage() {
         </h1>
         <button
           type="button"
-          onClick={scrollToTerms}
+          onClick={scrollToForm}
           className="absolute bottom-10 animate-bounce"
           aria-label="Ver más"
         >
@@ -94,22 +84,6 @@ export default function HomePage() {
               Con una amplia variedad de bicis para alquilar, esperamos que puedas moverte de manera
               más sustentable y así, cuidar nuestro planeta y también tu salud.
             </p>
-          </div>
-        </div>
-      </section>
-
-      <section id="terminos" className="bg-ucu-cream py-16 px-6">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="font-syne font-bold text-3xl text-ucu-navy text-center mb-10">
-            Términos y Condiciones
-          </h2>
-          <div className="space-y-8">
-            {TERMS_SECTIONS.map((s) => (
-              <div key={s.title}>
-                <h3 className="font-bold text-ucu-navy mb-2">{s.title}</h3>
-                <p className="text-gray-700 leading-relaxed text-sm">{s.body}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>

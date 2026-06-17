@@ -54,6 +54,20 @@ Cuando un usuario solicita devolver la bici en **Mi Bici**, el mail incluye el b
 1. Se abre una página de confirmación en el navegador.
 2. Confirmás → el préstamo se cierra y la bici queda disponible otra vez.
 
+## Email al solicitante (aprobación / rechazo)
+
+Cuando Bedelías aprueba o rechaza una solicitud, se envía un email al **correo del formulario**.
+
+Usa la misma configuración SMTP de Gmail (recomendado), porque Resend en modo prueba solo puede enviar a direcciones verificadas:
+
+```env
+SMTP_USER=nicolasgobbo2007@gmail.com
+SMTP_PASS=xxxx xxxx xxxx xxxx
+SMTP_FROM=BikeShare UCU <nicolasgobbo2007@gmail.com>
+```
+
+Reiniciá el backend después de cambiar `.env`.
+
 ## Sin SMTP (modo desarrollo)
 
 La solicitud igual se guarda en la tabla `rental_applications` y en:

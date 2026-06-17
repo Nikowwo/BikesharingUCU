@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import HomePage from './pages/HomePage';
 import MyBikePage from './pages/MyBikePage';
 import ProfilePage from './pages/ProfilePage';
+import TermsPage from './pages/TermsPage';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="/home" element={<HomePage />} />
             <Route path="/my-bike" element={<MyBikePage />} />
             <Route path="/perfil" element={<ProfilePage />} />
+            <Route path="/terminos" element={<TermsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>

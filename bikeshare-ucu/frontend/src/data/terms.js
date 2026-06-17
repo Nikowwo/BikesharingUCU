@@ -5,7 +5,7 @@ export const TERMS_SECTIONS = [
   },
   {
     title: '2. Registro y Solicitud',
-    body: `Para solicitar una bicicleta, el usuario debe completar el formulario al final de esta página, proporcionando sus datos personales y comprobante de domicilio (si difiere del registrado en la UCU). La solicitud debe realizarse antes de la tercera semana del semestre. El plazo de aprobación es de una semana por parte de Bedelías.`,
+    body: `Para solicitar una bicicleta, el usuario debe completar el formulario en la página de Inicio, proporcionando sus datos personales y comprobante de domicilio (si difiere del registrado en la UCU). La solicitud debe realizarse antes de la tercera semana del semestre. El plazo de aprobación es de una semana por parte de Bedelías.`,
   },
   {
     title: '3. Requisitos de elegibilidad',
