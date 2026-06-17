@@ -8,7 +8,7 @@ import { useAuth, getLoginErrorMessage } from '../context/AuthContext';
 
 export default function Register() {
   const { user, loading, register } = useAuth();
-  const [form, setForm] = useState({ name: '', email: '', password: '', ci: '', phone: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '' });
   const [showPass, setShowPass] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -40,7 +40,6 @@ export default function Register() {
               {[
                 ['name', 'Nombre completo', 'text'],
                 ['email', 'Correo electrónico', 'email'],
-                ['ci', 'CI (opcional)', 'text'],
                 ['phone', 'Teléfono (opcional)', 'tel'],
               ].map(([key, label, type]) => (
                 <div key={key}>

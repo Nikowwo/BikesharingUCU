@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -15,6 +15,15 @@ export default function HomePage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [file, setFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (window.location.hash === '#terminos') {
+      const timer = setTimeout(() => {
+        document.getElementById('terminos')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;

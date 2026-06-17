@@ -124,7 +124,7 @@ async function assignBikeFromApplication(applicationId) {
   };
 }
 
-async function rejectApplication(applicationId) {
+async function rejectApplication(applicationId, rejectionReason = null) {
   const [apps] = await db.query('SELECT * FROM rental_applications WHERE id = ? LIMIT 1', [
     applicationId,
   ]);
@@ -145,11 +145,55 @@ async function rejectApplication(applicationId) {
   }
 
   await db.query(
-    `UPDATE rental_applications SET status = 'rejected', reviewed_at = NOW() WHERE id = ?`,
-    [applicationId]
+    `UPDATE rental_applications SET status = 'rejected', reviewed_at = NOW(), rejection_reason = ? WHERE id = ?`,
+    [rejectionReason?.trim() || null, applicationId]
   );
 
-  return { alreadyRejected: false, application };
+  const [updated] = await db.query('SELECT * FROM rental_applications WHERE id = ? LIMIT 1', [
+    applicationId,
+  ]);
+
+  return { alreadyRejected: false, application: updated[0] };
+}
+
+function renderRejectFormPage({ applicationId, token, approveUrl, errorMessage = '' }) {
+  const actionUrl = `${API_PUBLIC_URL}/api/contact/reject/${applicationId}`;
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rechazar solicitud — BikeShare UCU</title>
+</head>
+<body style="font-family:system-ui,sans-serif;background:#f8f5f0;margin:0;padding:32px 16px;">
+  <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:12px;padding:28px;box-shadow:0 8px 24px rgba(0,0,0,.08);">
+    <h1 style="margin:0 0 12px;color:#1b263b;font-size:1.4rem;">Rechazar solicitud</h1>
+    <p style="margin:0 0 20px;color:#333;line-height:1.5;">Indicá el motivo del rechazo. El solicitante recibirá un email con esta información.</p>
+    ${errorMessage ? `<p style="color:#c1121f;margin:0 0 12px;">${errorMessage}</p>` : ''}
+    <form method="POST" action="${actionUrl}">
+      <input type="hidden" name="token" value="${token}" />
+      <label for="reason" style="display:block;font-weight:600;margin-bottom:8px;color:#1b263b;">Motivo del rechazo *</label>
+      <textarea
+        id="reason"
+        name="reason"
+        required
+        rows="4"
+        placeholder="Ej.: Documentación incompleta, comprobante de domicilio no válido..."
+        style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:1rem;resize:vertical;"
+      ></textarea>
+      <div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:10px;">
+        <button type="submit" style="padding:12px 20px;background:#6c757d;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+          Confirmar rechazo
+        </button>
+        <a href="${approveUrl}" style="display:inline-block;padding:12px 20px;background:#2d6a4f;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">
+          Volver — aprobar
+        </a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>`;
 }
 
 function renderActionPage({ title, message, tone = 'info', actions = [] }) {
@@ -193,4 +237,5 @@ module.exports = {
   assignBikeFromApplication,
   rejectApplication,
   renderActionPage,
+  renderRejectFormPage,
 };

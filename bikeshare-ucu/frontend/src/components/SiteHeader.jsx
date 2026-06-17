@@ -49,6 +49,14 @@ export default function SiteHeader({ variant = 'auth', logoTo }) {
 
   const logoLink = logoTo !== undefined ? logoTo : variant === 'auth' ? '/home' : null;
 
+  const goToTerms = () => {
+    if (pathname === '/home') {
+      document.getElementById('terminos')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/home#terminos');
+    }
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-ucu-navy text-white shadow-md">
       <div
@@ -66,6 +74,13 @@ export default function SiteHeader({ variant = 'auth', logoTo }) {
             <Link to="/my-bike" className={navBtn('/my-bike')}>
               Mi Bici
             </Link>
+            <button
+              type="button"
+              onClick={goToTerms}
+              className="ml-1 sm:ml-2 px-2 sm:px-3 py-1 text-xs sm:text-sm text-gray-300 underline underline-offset-2 whitespace-nowrap transition-all duration-200 hover:text-gray-100 hover:scale-105"
+            >
+              Términos y Condiciones
+            </button>
           </nav>
         )}
 

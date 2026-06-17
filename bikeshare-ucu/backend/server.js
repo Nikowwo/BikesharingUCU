@@ -24,6 +24,7 @@ app.use(cors({
 
 // Body parser JSON.
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Servir la carpeta de uploads como estatica.
 const uploadDir = process.env.UPLOAD_DIR || 'uploads/';

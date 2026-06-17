@@ -14,12 +14,17 @@ const {
   assignBikeFromApplication,
   rejectApplication,
   renderActionPage,
+  renderRejectFormPage,
 } = require('../services/rentalApproval');
 const {
   buildConfirmReturnUrl,
   verifyReturnToken,
   confirmLoanReturn,
 } = require('../services/returnConfirmation');
+const {
+  notifyApplicationApproved,
+  notifyApplicationRejected,
+} = require('../services/mailer');
 
 const router = express.Router();
 
@@ -99,6 +104,18 @@ router.get('/approve/:id', async (req, res) => {
       ? `La solicitud de <strong>${name}</strong> (${email}) ya estaba aprobada. Bici: <strong>${result.bikeCode}</strong>.`
       : `Bici <strong>${result.bikeCode}</strong> asignada a <strong>${name}</strong> (${email}). El usuario ya puede verla en Mi Bici.`;
 
+    if (!result.alreadyApproved && email) {
+      try {
+        await notifyApplicationApproved({
+          email,
+          fullName: name,
+          bikeCode: result.bikeCode,
+        });
+      } catch (mailErr) {
+        console.error('[contact/approve] notify user:', mailErr.message);
+      }
+    }
+
     return res.send(
       renderActionPage({
         title: result.alreadyApproved ? 'Ya estaba aprobada' : 'Bici asignada',
@@ -112,10 +129,10 @@ router.get('/approve/:id', async (req, res) => {
   }
 });
 
-// GET /api/contact/reject/:id?token=...&confirm=1
+// GET /api/contact/reject/:id?token=...
 router.get('/reject/:id', async (req, res) => {
   const applicationId = Number(req.params.id);
-  const { token, confirm } = req.query;
+  const { token } = req.query;
 
   if (!verifyApplicationToken(applicationId, token)) {
     return res.status(403).send(
@@ -127,28 +144,63 @@ router.get('/reject/:id', async (req, res) => {
     );
   }
 
-  if (confirm !== '1') {
-    const rejectUrl = `${buildRejectUrl(applicationId)}&confirm=1`;
-    const approveUrl = buildApproveUrl(applicationId);
-    return res.send(
+  const approveUrl = buildApproveUrl(applicationId);
+  return res.send(
+    renderRejectFormPage({
+      applicationId,
+      token,
+      approveUrl,
+    })
+  );
+});
+
+// POST /api/contact/reject/:id — confirmar rechazo con motivo
+router.post('/reject/:id', async (req, res) => {
+  const applicationId = Number(req.params.id);
+  const token = req.body?.token || req.query?.token;
+  const reason = req.body?.reason?.trim();
+
+  if (!verifyApplicationToken(applicationId, token)) {
+    return res.status(403).send(
       renderActionPage({
-        title: 'Rechazar solicitud',
-        message: '¿Confirmás que querés rechazar esta solicitud de alquiler?',
-        tone: 'info',
-        actions: [
-          { href: rejectUrl, label: 'Sí, rechazar', primary: false },
-          { href: approveUrl, label: 'Volver — aprobar', primary: true },
-        ],
+        title: 'Enlace inválido',
+        message: 'El enlace no es válido.',
+        tone: 'error',
+      })
+    );
+  }
+
+  if (!reason) {
+    const approveUrl = buildApproveUrl(applicationId);
+    return res.status(400).send(
+      renderRejectFormPage({
+        applicationId,
+        token,
+        approveUrl,
+        errorMessage: 'El motivo del rechazo es obligatorio.',
       })
     );
   }
 
   try {
-    const result = await rejectApplication(applicationId);
+    const result = await rejectApplication(applicationId, reason);
     const name = result.application.full_name;
+    const email = result.application.email;
     const msg = result.alreadyRejected
       ? `La solicitud de <strong>${name}</strong> ya estaba rechazada.`
-      : `Solicitud de <strong>${name}</strong> rechazada.`;
+      : `Solicitud de <strong>${name}</strong> rechazada. Se notificó al correo del formulario.`;
+
+    if (!result.alreadyRejected && email) {
+      try {
+        await notifyApplicationRejected({
+          email,
+          fullName: name,
+          reason,
+        });
+      } catch (mailErr) {
+        console.error('[contact/reject] notify user:', mailErr.message);
+      }
+    }
 
     return res.send(
       renderActionPage({

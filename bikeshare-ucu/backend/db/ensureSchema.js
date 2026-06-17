@@ -10,11 +10,22 @@ async function ensureRentalApplicationsTable() {
       email VARCHAR(255) NOT NULL,
       address_proof_path VARCHAR(500) NULL,
       status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+      rejection_reason TEXT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       reviewed_at TIMESTAMP NULL,
       FOREIGN KEY (user_id) REFERENCES users(id)
     )
   `);
+
+  try {
+    await db.query(
+      'ALTER TABLE rental_applications ADD COLUMN rejection_reason TEXT NULL AFTER status'
+    );
+  } catch (err) {
+    if (err.code !== 'ER_DUP_FIELDNAME') {
+      throw err;
+    }
+  }
 }
 
 module.exports = { ensureRentalApplicationsTable };

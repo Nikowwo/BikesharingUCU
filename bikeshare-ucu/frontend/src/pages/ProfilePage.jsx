@@ -80,12 +80,7 @@ export default function ProfilePage() {
                 onSave={updateProfile}
               />
               <EditableField label="Mail" value={user.email} field="email" onSave={updateProfile} />
-              {user.ci && (
-                <div className="py-2">
-                  <span className="text-sm text-gray-500">CI</span>
-                  <p className="font-medium">{user.ci}</p>
-                </div>
-              )}
+              <EditableField label="CI" value={user.ci} field="ci" onSave={updateProfile} />
             </div>
             <button
               type="button"
