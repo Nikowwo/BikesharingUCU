@@ -3,6 +3,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const { Resend } = require('resend');
 const db = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 const {
@@ -23,7 +24,6 @@ const {
 const {
   notifyApplicationApproved,
   notifyApplicationRejected,
-  sendAdminEmail,
 } = require('../services/mailer');
 
 const router = express.Router();
@@ -39,6 +39,13 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+
+function getResend() {
+  if (process.env.RESEND_API_KEY) {
+    return new Resend(process.env.RESEND_API_KEY);
+  }
+  return null;
+}
 
 const CONTACT_TO = process.env.CONTACT_TO || 'nicolasgobbo2007@gmail.com';
 
@@ -93,18 +100,19 @@ router.get('/approve/:id', async (req, res) => {
     const result = await assignBikeFromApplication(applicationId);
     const name = result.application.full_name;
     const email = result.application.email;
-    let msg = result.alreadyApproved
+    const msg = result.alreadyApproved
       ? `La solicitud de <strong>${name}</strong> (${email}) ya estaba aprobada. Bici: <strong>${result.bikeCode}</strong>.`
       : `Bici <strong>${result.bikeCode}</strong> asignada a <strong>${name}</strong> (${email}). El usuario ya puede verla en Mi Bici.`;
 
     if (!result.alreadyApproved && email) {
-      const mail = await notifyApplicationApproved({
-        email,
-        fullName: name,
-        bikeCode: result.bikeCode,
-      });
-      if (!mail.sent) {
-        msg += `<br/><br/><span style="color:#c1121f;">No se pudo enviar el email al solicitante (${email}): ${mail.error || 'error desconocido'}.</span>`;
+      try {
+        await notifyApplicationApproved({
+          email,
+          fullName: name,
+          bikeCode: result.bikeCode,
+        });
+      } catch (mailErr) {
+        console.error('[contact/approve] notify user:', mailErr.message);
       }
     }
 
@@ -178,18 +186,19 @@ router.post('/reject/:id', async (req, res) => {
     const result = await rejectApplication(applicationId, reason);
     const name = result.application.full_name;
     const email = result.application.email;
-    let msg = result.alreadyRejected
+    const msg = result.alreadyRejected
       ? `La solicitud de <strong>${name}</strong> ya estaba rechazada.`
       : `Solicitud de <strong>${name}</strong> rechazada. Se notificó al correo del formulario.`;
 
     if (!result.alreadyRejected && email) {
-      const mail = await notifyApplicationRejected({
-        email,
-        fullName: name,
-        reason,
-      });
-      if (!mail.sent) {
-        msg += `<br/><br/><span style="color:#c1121f;">No se pudo enviar el email al solicitante (${email}): ${mail.error || 'error desconocido'}.</span>`;
+      try {
+        await notifyApplicationRejected({
+          email,
+          fullName: name,
+          reason,
+        });
+      } catch (mailErr) {
+        console.error('[contact/reject] notify user:', mailErr.message);
       }
     }
 
@@ -369,29 +378,34 @@ Fecha: ${new Date().toLocaleString('es-UY')}
         : [],
     };
 
+    const resend = getResend();
     let emailSent = false;
     let emailNote = '';
 
-    try {
-      const mail = await sendAdminEmail({ subject, text: body, html: htmlBody });
-      emailSent = mail.sent;
-      emailNote = mail.sent
-        ? `Email enviado a ${CONTACT_TO}`
-        : `No se pudo enviar el email: ${mail.error || 'mail no configurado'}`;
-    } catch (mailErr) {
-      console.error('[contact/rental] sendMail:', mailErr.message);
-      emailNote = `No se pudo enviar el email: ${mailErr.message}`;
-    }
-
-    if (!emailSent && !process.env.SMTP_PASS && !process.env.RESEND_API_KEY) {
+    if (resend) {
+      try {
+        await resend.emails.send({
+          from: 'BikeShare UCU <onboarding@resend.dev>',
+          to: CONTACT_TO,
+          subject,
+          html: htmlBody,
+          text: body,
+        });
+        emailSent = true;
+        emailNote = `Email enviado a ${CONTACT_TO}`;
+      } catch (mailErr) {
+        console.error('[contact/rental] sendMail:', mailErr.message);
+        emailNote = `No se pudo enviar el email: ${mailErr.message}`;
+      }
+    } else {
       const logPath = path.join(uploadDir, `request-${Date.now()}.txt`);
       fs.writeFileSync(
         logPath,
         `TO: ${CONTACT_TO}\nSUBJECT: ${subject}\n\n${body}\n${req.file ? `FILE: ${req.file.path}` : ''}`
       );
-      console.log(`[contact/rental] Mail no configurado. Guardado en ${logPath}`);
+      console.log(`[contact/rental] SMTP incompleto. Guardado en ${logPath}`);
       emailNote =
-        'Mail no configurado: completá SMTP_PASS o RESEND_API_KEY en backend/.env (ver SETUP_EMAIL.md).';
+        'SMTP no configurado: completá SMTP_PASS en backend/.env (contraseña de aplicación de Google).';
     }
 
     return res.json({

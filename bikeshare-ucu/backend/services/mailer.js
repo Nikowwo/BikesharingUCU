@@ -1,31 +1,7 @@
-const nodemailer = require('nodemailer');
 const { Resend } = require('resend');
 
 const CONTACT_TO = process.env.CONTACT_TO || 'nicolasgobbo2007@gmail.com';
-
-function getFromAddress() {
-  return (
-    process.env.SMTP_FROM ||
-    (process.env.SMTP_USER ? `BikeShare UCU <${process.env.SMTP_USER}>` : null) ||
-    'BikeShare UCU <onboarding@resend.dev>'
-  );
-}
-
-function getSmtpTransporter() {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    return null;
-  }
-
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-}
+const FROM_ADDRESS = process.env.SMTP_FROM || 'BikeShare UCU <onboarding@resend.dev>';
 
 function getResend() {
   if (!process.env.RESEND_API_KEY) {
@@ -36,39 +12,22 @@ function getResend() {
 }
 
 async function sendEmail({ to, subject, text, html }) {
-  const from = getFromAddress();
-  const transporter = getSmtpTransporter();
-
-  if (transporter) {
-    try {
-      await transporter.sendMail({ from, to, subject, text, html });
-      console.log('[mailer] SMTP enviado a', to);
-      return { sent: true, to, provider: 'smtp' };
-    } catch (err) {
-      console.error('[mailer] SMTP error:', err.message);
-    }
-  }
-
   const resend = getResend();
-  if (resend) {
-    try {
-      await resend.emails.send({
-        from: 'BikeShare UCU <onboarding@resend.dev>',
-        to,
-        subject,
-        text,
-        html,
-      });
-      console.log('[mailer] Resend enviado a', to);
-      return { sent: true, to, provider: 'resend' };
-    } catch (err) {
-      console.error('[mailer] Resend error:', err.message);
-      return { sent: false, to, error: err.message };
-    }
+
+  if (!resend) {
+    console.warn('[mailer] RESEND_API_KEY no configurada — email no enviado a', to);
+    return { sent: false, to };
   }
 
-  console.warn('[mailer] Sin SMTP ni Resend — email no enviado a', to);
-  return { sent: false, to, error: 'Mail no configurado (SMTP_PASS o RESEND_API_KEY)' };
+  await resend.emails.send({
+    from: FROM_ADDRESS.includes('@') ? FROM_ADDRESS : 'BikeShare UCU <onboarding@resend.dev>',
+    to,
+    subject,
+    text,
+    html,
+  });
+
+  return { sent: true, to };
 }
 
 async function sendAdminEmail({ subject, text, html }) {
