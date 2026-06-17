@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
@@ -43,6 +43,12 @@ app.use('/api/contact', contactRoutes);
 
 ensureRentalApplicationsTable()
   .then(() => {
+    const brevoReady = Boolean(process.env.BREVO_API_KEY);
+    const smtpReady = Boolean(process.env.SMTP_USER && process.env.SMTP_PASS);
+    const resendReady = Boolean(process.env.RESEND_API_KEY);
+    console.log(
+      `[mailer] Email: Brevo=${brevoReady ? 'sí' : 'no'} | SMTP=${smtpReady ? process.env.SMTP_USER : 'no'} | Resend=${resendReady ? 'sí' : 'no'}`
+    );
     app.listen(PORT, () => {
       console.log(`[server] BikeShare UCU API escuchando en http://localhost:${PORT}`);
     });

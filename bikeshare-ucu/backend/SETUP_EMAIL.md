@@ -1,69 +1,53 @@
-# Cómo enviar el formulario a nicolasgobbo2007@gmail.com
+# Configuración de email
 
-El formulario de alquiler usa **nodemailer**. Sin SMTP configurado, la solicitud se guarda en la base de datos pero **no llega ningún email**.
+## Recomendado: Brevo (Railway + mails a cualquier alumno)
 
-## Pasos (Gmail)
+### 1. Brevo
+1. Creá cuenta en [brevo.com](https://www.brevo.com)
+2. **Settings → Senders** → verificá `nicolasgobbo2007@gmail.com` (código de 6 dígitos)
+3. **Settings → SMTP & API → API Keys** → generá una key (`xkeysib-...`)
 
-1. Entrá a tu cuenta Google → **Seguridad** → activá **Verificación en 2 pasos**.
-
-2. Creá una **Contraseña de aplicación**:
-   - Google Account → Seguridad → Contraseñas de aplicaciones
-   - Nombre: `BikeShare UCU`
-   - Copiá la contraseña de 16 caracteres
-
-3. Editá `backend/.env`:
+### 2. Variables en Railway / `backend/.env`
 
 ```env
+BREVO_API_KEY=xkeysib-tu-key-aqui
+BREVO_FROM_EMAIL=nicolasgobbo2007@gmail.com
+BREVO_FROM_NAME=BikeShare UCU
 CONTACT_TO=nicolasgobbo2007@gmail.com
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=nicolasgobbo2007@gmail.com
-SMTP_PASS=xxxx xxxx xxxx xxxx
-SMTP_FROM=BikeShare UCU <nicolasgobbo2007@gmail.com>
+API_PUBLIC_URL=https://tu-backend.up.railway.app
+FRONTEND_URL=https://bikesharing-ucu.vercel.app
 ```
 
-4. **Reiniciá el backend** (`npm start`).
+No hace falta clave SMTP de Brevo ni dominio propio para empezar.
 
-5. Enviá el formulario desde Inicio. Deberías recibir el mail en `nicolasgobbo2007@gmail.com`.
+### 3. Reiniciá / redeploy el backend
 
-## Aprobar desde el email (un clic)
-
-Cada mail incluye botones **Aprobar y asignar** / **Rechazar**. Al hacer clic:
-
-1. Se abre una página de confirmación en el navegador.
-2. Confirmás → se asigna la bici `UCU-001` y el usuario la ve en **Mi Bici**.
-
-Variables opcionales en `backend/.env`:
-
-```env
-API_PUBLIC_URL=http://localhost:3001
-DEFAULT_BIKE_CODE=UCU-001
-CURRENT_SEMESTER=2026-S1
-APPROVE_SECRET=una-clave-secreta-larga
+Al arrancar deberías ver:
+```
+[mailer] Email: Brevo=sí | SMTP=... | Resend=...
 ```
 
-`APPROVE_SECRET` protege los enlaces del mail. Si no la definís, se usa `JWT_SECRET`.
+---
 
-**Importante:** el backend debe estar corriendo cuando hagas clic en el enlace.
+## Flujo de emails
 
-## Confirmar devolución desde el email
+1. **Formulario** → Bedelías recibe solicitud (Aprobar / Rechazar)
+2. **Aprobar** → mail al correo del formulario
+3. **Rechazar** (con motivo) → mail al correo del formulario
 
-Cuando un usuario solicita devolver la bici en **Mi Bici**, el mail incluye el botón **Confirmar devolución**. Al hacer clic:
+---
 
-1. Se abre una página de confirmación en el navegador.
-2. Confirmás → el préstamo se cierra y la bici queda disponible otra vez.
+## Alternativas (respaldo)
 
-## Sin SMTP (modo desarrollo)
+| Método | Cuándo usarlo |
+|--------|----------------|
+| **Gmail SMTP** | Desarrollo local (`SMTP_USER`, `SMTP_PASS`) |
+| **Resend** | Solo si tenés dominio verificado (`RESEND_API_KEY`) |
 
-La solicitud igual se guarda en la tabla `rental_applications` y en:
+Orden en código: **Brevo → Resend → Gmail SMTP**
 
-```
-backend/data/rental-requests/request-*.txt
-```
+---
 
-Para asignar bici después: ejecutá `database/assign_test_bike.sql` en phpMyAdmin.
+## Sin configuración
 
-## Producción
-
-Cambiá `CONTACT_TO=estudiantes@ucu.edu.uy` cuando la facultad use su propio correo.
+La solicitud se guarda en `rental_applications` y en `backend/data/rental-requests/request-*.txt`
