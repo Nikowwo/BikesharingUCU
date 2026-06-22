@@ -105,7 +105,7 @@ export default function HomePage() {
             <BrandLogo to={null} className="h-24 md:h-28" />
           </div>
           <div>
-            <h2 className="font-asap font-semibold text-heading-md mb-3">BIKESHARE UCU TE OFRECE LO QUE BUSCÁS.</h2>
+            <h2 className="font-asap font-semibold text-xl mb-3">BIKESHARE UCU TE OFRECE LO QUE BUSCÁS.</h2>
             <p className="text-white/85 leading-relaxed">
               Con una amplia variedad de bicis para alquilar, esperamos que puedas moverte de manera
               más sustentable y así, cuidar nuestro planeta y también tu salud.
