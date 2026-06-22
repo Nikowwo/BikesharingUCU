@@ -11,7 +11,7 @@ export default function LoginHero() {
     >
       <div className="flex-1 flex items-center justify-center p-10">
         <div className="bg-black/45 backdrop-blur-sm rounded-2xl p-8 max-w-md text-white">
-          <h2 className="font-syne font-bold text-xl mb-4 leading-snug">
+          <h2 className="font-jakarta font-title text-xl mb-4 leading-snug">
             ¿Estudiás en la UCU y querés alquilar una bici?
           </h2>
           <p className="text-sm leading-relaxed text-white/90">

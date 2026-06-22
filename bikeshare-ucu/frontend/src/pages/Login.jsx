@@ -40,7 +40,7 @@ export default function Login() {
 
         <div className="flex-1 flex items-center justify-center px-8 py-12 bg-ucu-cream">
           <div className="w-full max-w-md">
-            <h1 className="font-syne font-bold text-3xl text-ucu-navy mb-8">Iniciar Sesión</h1>
+            <h1 className="font-jakarta font-title text-3xl text-ucu-navy mb-8">Iniciar Sesión</h1>
 
             <div className="mb-8">
               <GoogleLogin

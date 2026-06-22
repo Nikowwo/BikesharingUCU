@@ -86,7 +86,7 @@ export default function HomePage() {
   return (
     <AppLayout className="!pt-0">
       <section className="relative min-h-screen hero-campus flex flex-col items-center justify-center text-center text-white">
-        <h1 className="font-syne font-bold text-3xl md:text-5xl max-w-3xl px-6 leading-tight">
+        <h1 className="font-jakarta font-title text-3xl md:text-5xl max-w-3xl px-6 leading-tight">
           ¿Estás buscando una bici para ir a la facultad?
         </h1>
         <button
@@ -105,7 +105,7 @@ export default function HomePage() {
             <BrandLogo to={null} className="h-24 md:h-28" />
           </div>
           <div>
-            <h2 className="font-syne font-bold text-xl mb-3">BikeShare UCU te ofrece lo que buscás.</h2>
+            <h2 className="font-jakarta font-title text-xl mb-3">BikeShare UCU te ofrece lo que buscás.</h2>
             <p className="text-white/85 leading-relaxed">
               Con una amplia variedad de bicis para alquilar, esperamos que puedas moverte de manera
               más sustentable y así, cuidar nuestro planeta y también tu salud.
@@ -119,7 +119,7 @@ export default function HomePage() {
         className="bg-ucu-cream text-ucu-navy px-6 pt-28 pb-16 min-h-[calc(100vh-4rem)] flex flex-col justify-center -mt-px"
       >
         <div className="max-w-xl mx-auto w-full py-6 md:py-8">
-          <h2 className="font-syne font-bold text-2xl md:text-3xl text-center mb-8">Alquilá tu bici acá</h2>
+          <h2 className="font-jakarta font-title text-2xl md:text-3xl text-center mb-8">Alquilá tu bici acá</h2>
           <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
             <div>
               <label className="block text-sm mb-1">Nombre Completo:*</label>

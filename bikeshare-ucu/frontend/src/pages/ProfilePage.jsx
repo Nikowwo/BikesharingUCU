@@ -76,7 +76,7 @@ export default function ProfilePage() {
       <main className="min-h-[calc(100vh-7rem)] flex items-center justify-center px-4 py-12">
         <div className="grid md:grid-cols-2 gap-6 max-w-4xl w-full">
           <div className="bg-ucu-card rounded-2xl p-8 shadow-xl">
-            <h1 className="font-syne font-bold text-2xl text-ucu-green text-center mb-6">Tu Perfil</h1>
+            <h1 className="font-jakarta font-title text-2xl text-ucu-green text-center mb-6">Tu Perfil</h1>
             <div className="space-y-1">
               <div className="py-2 border-b border-gray-100">
                 <span className="text-sm text-gray-500">Nombre</span>
@@ -101,8 +101,8 @@ export default function ProfilePage() {
           </div>
 
           <div className="bg-ucu-card rounded-2xl p-8 shadow-xl flex flex-col items-center justify-center text-center">
-            <h2 className="font-syne font-bold text-2xl text-ucu-green mb-4">CO₂ ahorrado</h2>
-            <p className="font-syne font-bold text-5xl text-ucu-navy mb-3">
+            <h2 className="font-jakarta font-title text-2xl text-ucu-green mb-4">CO₂ ahorrado</h2>
+            <p className="font-jakarta font-title text-5xl text-ucu-navy mb-3">
               {co2Kg.toFixed(1)} kg
             </p>
             {co2Savings?.applies ? (

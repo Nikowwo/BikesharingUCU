@@ -20,13 +20,13 @@ export default function TermsPage() {
     <AppLayout>
       <section className="bg-ucu-cream py-16 px-6 min-h-[calc(100vh-7rem)]">
         <div className="max-w-3xl mx-auto">
-          <h1 className="font-syne font-bold text-3xl text-ucu-navy text-center mb-10">
+          <h1 className="font-jakarta font-title text-3xl text-ucu-navy text-center mb-10">
             Términos y Condiciones
           </h1>
           <div className="space-y-8">
             {TERMS_SECTIONS.map((s) => (
               <div key={s.title}>
-                <h2 className="font-bold text-ucu-navy mb-2">{s.title}</h2>
+                <h2 className="font-jakarta font-title text-ucu-navy mb-2">{s.title}</h2>
                 <p className="text-gray-700 leading-relaxed text-sm">{s.body}</p>
               </div>
             ))}

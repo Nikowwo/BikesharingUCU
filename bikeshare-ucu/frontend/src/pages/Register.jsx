@@ -35,7 +35,7 @@ export default function Register() {
         <LoginHero />
         <div className="flex-1 flex items-center justify-center px-8 py-12 bg-ucu-cream">
           <div className="w-full max-w-md">
-            <h1 className="font-syne font-bold text-3xl text-ucu-navy mb-6">Crear cuenta</h1>
+            <h1 className="font-jakarta font-title text-3xl text-ucu-navy mb-6">Crear cuenta</h1>
             <form onSubmit={handleSubmit} className="space-y-4">
               {[
                 ['name', 'Nombre completo', 'text'],

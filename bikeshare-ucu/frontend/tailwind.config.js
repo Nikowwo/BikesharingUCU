@@ -13,8 +13,11 @@ export default {
         },
       },
       fontFamily: {
-        syne: ['Syne', 'sans-serif'],
+        jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
+      },
+      fontWeight: {
+        title: '670',
       },
     },
   },
