@@ -213,6 +213,22 @@ export default function MyBikePage() {
               )}
             </div>
 
+            {bike.co2_savings?.applies && (
+              <div className="bg-ucu-card rounded-2xl p-8 shadow-xl text-center">
+                <h3 className="font-syne font-bold text-lg text-ucu-green mb-2">CO₂ ahorrado</h3>
+                <p className="font-syne font-bold text-4xl text-ucu-navy mb-2">
+                  {Number(bike.co2_savings.saved_kg).toFixed(1)} kg
+                </p>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Estimado desde que usás la bici en lugar de{' '}
+                  <strong>{bike.co2_savings.previous_transport_label}</strong>, con{' '}
+                  {bike.co2_savings.days_per_week}{' '}
+                  {bike.co2_savings.days_per_week === 1 ? 'día' : 'días'} por semana a la facultad
+                  y {Number(bike.co2_savings.distance_km)} km por tramo.
+                </p>
+              </div>
+            )}
+
             <div className="bg-ucu-card rounded-2xl p-8 shadow-xl">
               <h3 className="font-syne font-bold text-lg text-ucu-navy mb-3">
                 ¿Querés devolver la bici?

@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const db = require('../db');
 const { authenticateToken } = require('../middleware/auth');
+const { calculateCo2Savings } = require('../services/co2Calculator');
 
 const router = express.Router();
 
@@ -57,6 +58,25 @@ router.get('/my', authenticateToken, async (req, res) => {
     }
 
     const bike = bikeRows[0];
+
+    const [applications] = await db.query(
+      `SELECT days_per_week, previous_transport, distance_km
+       FROM rental_applications
+       WHERE user_id = ? AND status = 'approved'
+       ORDER BY reviewed_at DESC
+       LIMIT 1`,
+      [req.user.id]
+    );
+
+    const application = applications[0] || null;
+    bike.co2_savings = application
+      ? calculateCo2Savings({
+          previous_transport: application.previous_transport,
+          days_per_week: application.days_per_week,
+          distance_km: application.distance_km,
+          approval_date: bike.approval_date,
+        })
+      : { applies: false, saved_kg: 0 };
 
     const [track] = await db.query(
       `SELECT lat, lng, recorded_at

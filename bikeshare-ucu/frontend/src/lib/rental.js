@@ -1,3 +1,4 @@
+/** Duración del alquiler en días (semestre) */
 export const RENTAL_DAYS = 150;
 
 export function parseDbDate(value) {
