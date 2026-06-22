@@ -9,9 +9,3 @@ export const PREVIOUS_TRANSPORT_OPTIONS = [
   { value: 'monopatin', label: 'Monopatín' },
   { value: 'otro', label: 'Otro' },
 ];
-
-export const MOTORIZED_TRANSPORT_VALUES = ['omnibus', 'auto', 'taxi_uber', 'motocicleta'];
-
-export function isMotorizedTransport(value) {
-  return MOTORIZED_TRANSPORT_VALUES.includes(value);
-}
