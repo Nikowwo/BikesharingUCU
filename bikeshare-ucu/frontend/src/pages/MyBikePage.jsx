@@ -163,11 +163,11 @@ export default function MyBikePage() {
             </div>
           </div>
 
-          <div className="bg-ucu-card rounded-2xl p-8 shadow-xl">
+          <div className="bg-ucu-card rounded-2xl p-8 shadow-xl text-center">
             <h3 className="font-syne font-bold text-lg text-ucu-navy mb-3">
               ¿Querés devolver la bici?
             </h3>
-            <p className="text-sm text-gray-600 leading-relaxed">
+            <p className="text-sm text-gray-600 leading-relaxed mx-auto max-w-xl">
               Si querés devolver tu bicicleta alquilada, clickeá{' '}
               <button
                 type="button"

@@ -1,31 +1,31 @@
 export const TERMS_SECTIONS = [
   {
     title: '1. Objetivos del sistema',
-    body: `El objetivo del sistema es promover la movilidad sustentable de estudiantes y funcionarios de la Universidad Católica del Uruguay, campus Montevideo, reduciendo las emisiones de gases de efecto invernadero. El servicio es gratuito, pero el uso irresponsable o el incumplimiento de las normas puede derivar en compensaciones monetarias.`,
+    body: `El servicio BikeShare UCU busca fomentar la movilidad sustentable de forma accesible para los estudiantes y funcionarios del campus Montevideo, contribuyendo a la reducción de emisiones de gases de efecto invernadero al promover el uso de bicicletas en lugar de transporte a combustión. El servicio no requiere costo alguno pero el uso irresponsable o el incumplimiento de alguna de las normas puede conllevar una compensación monetaria.`,
   },
   {
     title: '2. Registro y Solicitud',
-    body: `Para solicitar una bicicleta, el usuario debe completar el formulario en la página de Inicio, proporcionando sus datos personales y comprobante de domicilio (si difiere del registrado en la UCU). La solicitud debe realizarse antes de la tercera semana del semestre. El plazo de aprobación es de una semana por parte de Bedelías.`,
+    body: `Para hacer uso del servicio, el usuario debe rellenar el formulario al final de esta página, indicando los datos personales necesarios y adjuntando un comprobante de domicilio requerido únicamente si los datos registrados en la UCU no coinciden con la residencia actual. El envío de la solicitud tiene como fecha límite la tercera semana del semestre y se obtendrá la aprobación de Bedelías en un plazo máximo de una semana tras enviada la solicitud.`,
   },
   {
     title: '3. Requisitos de elegibilidad',
-    body: `El usuario debe residir a menos de 5 km del campus Montevideo de la UCU. No debe tener derechos revocados ni una bicicleta ya asignada.`,
+    body: `El usuario debe residir a una distancia menor a cinco kilómetros del campus Montevideo y no debe tener revocado el derecho al servicio o ya tener una bicicleta de la UCU bajo su nombre.`,
   },
   {
     title: '4. Términos y Condiciones de uso',
-    body: `Las bicicletas cuentan con código único y chip de rastreo para identificación y recuperación, no para monitorear la actividad del usuario salvo casos necesarios. Las bicis son para uso académico y personal vinculado a la UCU. Casco y elementos reflectantes son obligatorios. El préstamo es intransferible y limitado a uno por persona por semestre. Si el estudiante abandona la matrícula, debe devolver la bicicleta inmediatamente.`,
+    body: `Cada bicicleta tiene un código único que las identifica y un chip que notifica al usuario si alguna o ambas ruedas están bajas. El chip se activa al presionar un botón que se halla en la horquilla (para chequear la rueda delantera) o en la vaina (para chequear la rueda trasera) de la bicicleta y enciende una luz led si la rueda chequeada está baja. La bicicleta debe de estar parada sobre un piso liso y sin peso encima o la medición de la distancia del chip al suelo se vería afectada. Se recomienda mantener presionado el botón para asegurarse que el dispositivo está midiendo bien la distancia. El uso de las bicicletas es exclusivo para fines académicos y personales vinculados a la UCU. El uso de casco y elementos reflectivos es obligatorio, al igual que el cumplimiento de las normas de circulación vigentes. El préstamo de las bicicletas no es transferible a terceros y solo se puede solicitar un préstamo por persona por semestre. En caso de dar de baja la matrícula con el préstamo vigente, automáticamente este pierde la vigencia y la bicicleta debe ser retornada en perfecto estado. En caso de robo, extravío o daño, el usuario deberá pagar una compensación correspondiente.`,
   },
   {
     title: '5. Daños y reparaciones',
-    body: `Las reparaciones previas a la entrega son responsabilidad de la universidad. Cualquier daño posterior al inicio del préstamo es responsabilidad del usuario y se cargará a su cuenta con un mes de anticipación. La bici debe devolverse a la universidad para reparaciones.`,
+    body: `Las reparaciones necesarias antes de la entrega corren por cuenta de la universidad. Una vez iniciado el préstamo, cualquier daño será responsabilidad del usuario. Cualquier daño de la bicicleta será acreditado a la cuenta del usuario y será notificado con un mes de antelación antes de cobrarse el monto. Se deberá entregar la bicicleta a la universidad para realizar las reparaciones con un tiempo de devolución dependiente de la gravedad del daño.`,
   },
   {
     title: '6. Devolución',
-    body: `La bicicleta debe devolverse durante la antepenúltima semana del semestre, en perfecto estado (sin rayones, chip intacto, neumáticos en buen estado). Si se detectan daños en la inspección, se notificará al usuario y se solicitará compensación.`,
+    body: `La devolución de la bicicleta debe realizarse la antepenúltima semana del semestre en perfecto estado (sin rayaduras, con el chip intacto y las ruedas en condiciones). Si tras revisión se hallan daños, se notificará al usuario y se solicitará una compensación adecuada al daño.`,
   },
   {
     title: '7. Sanciones',
-    body: `Las devoluciones tardías generan sanciones proporcionales. Las sanciones van desde una advertencia hasta la pérdida de derechos para futuros préstamos. No devolver o reemplazar la bicicleta implica pérdida de derechos futuros y cargo de compensación financiera.`,
+    body: `La devolución tardía de la bicicleta conlleva una sanción proporcional a su tiempo de retraso. La sanción puede variar desde una advertencia hasta la pérdida del derecho de futuros préstamos. La no devolución o reposición de la bicicleta conlleva la pérdida del derecho de futuros préstamos junto con el cobro de una compensación económica acreditada a la cuenta del usuario, y notificada con antelación.`,
   },
   {
     title: '8. Accidentes y responsabilidad',
