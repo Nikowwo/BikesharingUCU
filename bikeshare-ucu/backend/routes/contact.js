@@ -41,6 +41,32 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
+const PREVIOUS_TRANSPORT_LABELS = {
+  caminando: 'A pie',
+  omnibus: 'Ómnibus',
+  auto: 'Auto particular',
+  taxi_uber: 'Taxi / Uber',
+  motocicleta: 'Motocicleta',
+  monopatin: 'Monopatín',
+  otro: 'Otro',
+};
+
+function parseDaysPerWeek(value) {
+  const days = Number(value);
+  if (!Number.isInteger(days) || days < 1 || days > 7) {
+    return null;
+  }
+  return days;
+}
+
+function parsePreviousTransport(value) {
+  const key = value?.trim();
+  if (!key || !PREVIOUS_TRANSPORT_LABELS[key]) {
+    return null;
+  }
+  return key;
+}
+
 function actionErrorPage(err) {
   const messages = {
     NOT_FOUND: 'No encontramos esa solicitud.',
@@ -282,7 +308,7 @@ router.get('/confirm-return/:id', async (req, res) => {
 router.get('/my-application', authenticateToken, async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT id, full_name, ci, email, status, created_at, reviewed_at
+      `SELECT id, full_name, ci, email, days_per_week, previous_transport, status, created_at, reviewed_at
        FROM rental_applications
        WHERE user_id = ?
        ORDER BY created_at DESC
@@ -302,10 +328,22 @@ router.get('/my-application', authenticateToken, async (req, res) => {
 // POST /api/contact/rental
 router.post('/rental', authenticateToken, upload.single('address_proof'), async (req, res) => {
   try {
-    const { full_name, ci, email } = req.body;
+    const { full_name, ci, email, days_per_week, previous_transport } = req.body;
     if (!full_name?.trim() || !ci?.trim() || !email?.trim()) {
       return res.status(400).json({ error: 'Nombre, CI y email son obligatorios' });
     }
+
+    const daysPerWeek = parseDaysPerWeek(days_per_week);
+    if (daysPerWeek === null) {
+      return res.status(400).json({ error: 'Seleccioná cuántos días por semana vas a la facultad (1 a 7)' });
+    }
+
+    const transportKey = parsePreviousTransport(previous_transport);
+    if (!transportKey) {
+      return res.status(400).json({ error: 'Seleccioná tu método de transporte anterior' });
+    }
+
+    const transportLabel = PREVIOUS_TRANSPORT_LABELS[transportKey];
 
     const [pending] = await db.query(
       `SELECT id FROM rental_applications WHERE user_id = ? AND status = 'pending' LIMIT 1`,
@@ -327,9 +365,9 @@ router.post('/rental', authenticateToken, upload.single('address_proof'), async 
 
     const proofPath = req.file ? req.file.path : null;
     const [result] = await db.query(
-      `INSERT INTO rental_applications (user_id, full_name, ci, email, address_proof_path, status)
-       VALUES (?, ?, ?, ?, ?, 'pending')`,
-      [req.user.id, full_name.trim(), ci.trim(), email.trim(), proofPath]
+      `INSERT INTO rental_applications (user_id, full_name, ci, email, days_per_week, previous_transport, address_proof_path, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      [req.user.id, full_name.trim(), ci.trim(), email.trim(), daysPerWeek, transportKey, proofPath]
     );
     const applicationId = result.insertId;
 
@@ -349,6 +387,8 @@ Nueva solicitud de alquiler de bicicleta — BikeShare UCU
 Nombre completo: ${full_name.trim()}
 CI: ${ci.trim()}
 Correo electrónico: ${email.trim()}
+Días a la facultad por semana: ${daysPerWeek}
+Transporte anterior: ${transportLabel}
 ID usuario en sistema: ${req.user.id}
 ID solicitud: ${applicationId}
 
@@ -369,6 +409,8 @@ Fecha: ${new Date().toLocaleString('es-UY')}
           <tr><td><strong>Nombre</strong></td><td>${full_name.trim()}</td></tr>
           <tr><td><strong>CI</strong></td><td>${ci.trim()}</td></tr>
           <tr><td><strong>Email</strong></td><td>${email.trim()}</td></tr>
+          <tr><td><strong>Días/semana facultad</strong></td><td>${daysPerWeek}</td></tr>
+          <tr><td><strong>Transporte anterior</strong></td><td>${transportLabel}</td></tr>
           <tr><td><strong>ID solicitud</strong></td><td>${applicationId}</td></tr>
         </table>
         <p style="margin:0 0 12px;">

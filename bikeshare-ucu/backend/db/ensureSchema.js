@@ -8,6 +8,8 @@ async function ensureRentalApplicationsTable() {
       full_name VARCHAR(255) NOT NULL,
       ci VARCHAR(50) NOT NULL,
       email VARCHAR(255) NOT NULL,
+      days_per_week TINYINT NULL,
+      previous_transport VARCHAR(50) NULL,
       address_proof_path VARCHAR(500) NULL,
       status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
       rejection_reason TEXT NULL,
@@ -17,13 +19,19 @@ async function ensureRentalApplicationsTable() {
     )
   `);
 
-  try {
-    await db.query(
-      'ALTER TABLE rental_applications ADD COLUMN rejection_reason TEXT NULL AFTER status'
-    );
-  } catch (err) {
-    if (err.code !== 'ER_DUP_FIELDNAME') {
-      throw err;
+  const columnMigrations = [
+    'ALTER TABLE rental_applications ADD COLUMN rejection_reason TEXT NULL AFTER status',
+    'ALTER TABLE rental_applications ADD COLUMN days_per_week TINYINT NULL AFTER email',
+    'ALTER TABLE rental_applications ADD COLUMN previous_transport VARCHAR(50) NULL AFTER days_per_week',
+  ];
+
+  for (const sql of columnMigrations) {
+    try {
+      await db.query(sql);
+    } catch (err) {
+      if (err.code !== 'ER_DUP_FIELDNAME') {
+        throw err;
+      }
     }
   }
 }

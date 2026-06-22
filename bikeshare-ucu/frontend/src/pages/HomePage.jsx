@@ -7,7 +7,18 @@ import BrandLogo from '../components/BrandLogo';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 
-const EMPTY_FORM = { full_name: '', ci: '', email: '' };
+import {
+  DAYS_PER_WEEK_OPTIONS,
+  PREVIOUS_TRANSPORT_OPTIONS,
+} from '../data/rentalForm';
+
+const EMPTY_FORM = {
+  full_name: '',
+  ci: '',
+  email: '',
+  days_per_week: '',
+  previous_transport: '',
+};
 
 export default function HomePage() {
   const { user, loading } = useAuth();
@@ -32,6 +43,8 @@ export default function HomePage() {
       fd.append('full_name', form.full_name);
       fd.append('ci', form.ci);
       fd.append('email', form.email);
+      fd.append('days_per_week', form.days_per_week);
+      fd.append('previous_transport', form.previous_transport);
       if (file) fd.append('address_proof', file);
 
       const { data } = await api.post('/contact/rental', fd, {
@@ -127,6 +140,44 @@ export default function HomePage() {
                 placeholder=""
                 required
               />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">¿Cuántos días por semana vas a la facultad?*</label>
+              <select
+                value={form.days_per_week}
+                onChange={(e) => setForm({ ...form, days_per_week: e.target.value })}
+                className="select-underline-navy"
+                required
+              >
+                <option value="" disabled>
+                  Seleccioná una opción
+                </option>
+                {DAYS_PER_WEEK_OPTIONS.map((day) => (
+                  <option key={day} value={day}>
+                    {day} {day === 1 ? 'día' : 'días'}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm mb-1">
+                ¿Qué método de transporte usabas antes de la bici?*
+              </label>
+              <select
+                value={form.previous_transport}
+                onChange={(e) => setForm({ ...form, previous_transport: e.target.value })}
+                className="select-underline-navy"
+                required
+              >
+                <option value="" disabled>
+                  Seleccioná una opción
+                </option>
+                {PREVIOUS_TRANSPORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <p className="text-sm mb-1">¿Cambiaste de dirección?</p>

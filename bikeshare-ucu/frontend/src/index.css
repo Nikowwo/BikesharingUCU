@@ -74,6 +74,10 @@ body {
   @apply w-full bg-transparent border-b border-ucu-navy/60 py-2 text-ucu-navy placeholder:text-ucu-navy/50 outline-none focus:border-ucu-navy;
 }
 
+.select-underline-navy {
+  @apply w-full bg-transparent border-b border-ucu-navy/60 py-2 text-ucu-navy outline-none focus:border-ucu-navy cursor-pointer;
+}
+
 .btn-navy {
   @apply bg-ucu-navy text-white font-medium px-6 py-2.5 rounded-md hover:bg-ucu-navy/90 transition-colors;
 }
