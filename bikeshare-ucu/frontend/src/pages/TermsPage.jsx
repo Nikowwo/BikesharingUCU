@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import AppLayout from '../layouts/AppLayout';
 import { useAuth } from '../context/AuthContext';
@@ -5,6 +6,10 @@ import { TERMS_SECTIONS } from '../data/terms';
 
 export default function TermsPage() {
   const { user, loading } = useAuth();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
