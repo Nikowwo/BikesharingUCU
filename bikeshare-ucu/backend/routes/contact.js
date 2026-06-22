@@ -67,6 +67,15 @@ function parsePreviousTransport(value) {
   return key;
 }
 
+function parseDistanceKm(value) {
+  const normalized = String(value ?? '').trim().replace(',', '.');
+  const km = Number(normalized);
+  if (!Number.isFinite(km) || km <= 0 || km > 100) {
+    return null;
+  }
+  return Math.round(km * 100) / 100;
+}
+
 function actionErrorPage(err) {
   const messages = {
     NOT_FOUND: 'No encontramos esa solicitud.',
@@ -308,7 +317,7 @@ router.get('/confirm-return/:id', async (req, res) => {
 router.get('/my-application', authenticateToken, async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT id, full_name, ci, email, days_per_week, previous_transport, status, created_at, reviewed_at
+      `SELECT id, full_name, ci, email, days_per_week, previous_transport, distance_km, status, created_at, reviewed_at
        FROM rental_applications
        WHERE user_id = ?
        ORDER BY created_at DESC
@@ -328,9 +337,13 @@ router.get('/my-application', authenticateToken, async (req, res) => {
 // POST /api/contact/rental
 router.post('/rental', authenticateToken, upload.single('address_proof'), async (req, res) => {
   try {
-    const { full_name, ci, email, days_per_week, previous_transport } = req.body;
+    const { full_name, ci, email, days_per_week, previous_transport, distance_km } = req.body;
     if (!full_name?.trim() || !ci?.trim() || !email?.trim()) {
       return res.status(400).json({ error: 'Nombre, CI y email son obligatorios' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'El comprobante de dirección es obligatorio' });
     }
 
     const daysPerWeek = parseDaysPerWeek(days_per_week);
@@ -341,6 +354,11 @@ router.post('/rental', authenticateToken, upload.single('address_proof'), async 
     const transportKey = parsePreviousTransport(previous_transport);
     if (!transportKey) {
       return res.status(400).json({ error: 'Seleccioná tu método de transporte anterior' });
+    }
+
+    const distanceKm = parseDistanceKm(distance_km);
+    if (distanceKm === null) {
+      return res.status(400).json({ error: 'Ingresá la distancia en km (número mayor a 0)' });
     }
 
     const transportLabel = PREVIOUS_TRANSPORT_LABELS[transportKey];
@@ -363,11 +381,20 @@ router.post('/rental', authenticateToken, upload.single('address_proof'), async 
       return res.status(409).json({ error: 'Ya tenés una bici asignada' });
     }
 
-    const proofPath = req.file ? req.file.path : null;
+    const proofPath = req.file.path;
     const [result] = await db.query(
-      `INSERT INTO rental_applications (user_id, full_name, ci, email, days_per_week, previous_transport, address_proof_path, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`,
-      [req.user.id, full_name.trim(), ci.trim(), email.trim(), daysPerWeek, transportKey, proofPath]
+      `INSERT INTO rental_applications (user_id, full_name, ci, email, days_per_week, previous_transport, distance_km, address_proof_path, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      [
+        req.user.id,
+        full_name.trim(),
+        ci.trim(),
+        email.trim(),
+        daysPerWeek,
+        transportKey,
+        distanceKm,
+        proofPath,
+      ]
     );
     const applicationId = result.insertId;
 
@@ -388,6 +415,7 @@ Nombre completo: ${full_name.trim()}
 CI: ${ci.trim()}
 Correo electrónico: ${email.trim()}
 Días a la facultad por semana: ${daysPerWeek}
+Distancia hasta la facultad: ${distanceKm} km
 Transporte anterior: ${transportLabel}
 ID usuario en sistema: ${req.user.id}
 ID solicitud: ${applicationId}
@@ -410,6 +438,7 @@ Fecha: ${new Date().toLocaleString('es-UY')}
           <tr><td><strong>CI</strong></td><td>${ci.trim()}</td></tr>
           <tr><td><strong>Email</strong></td><td>${email.trim()}</td></tr>
           <tr><td><strong>Días/semana facultad</strong></td><td>${daysPerWeek}</td></tr>
+          <tr><td><strong>Distancia (km)</strong></td><td>${distanceKm}</td></tr>
           <tr><td><strong>Transporte anterior</strong></td><td>${transportLabel}</td></tr>
           <tr><td><strong>ID solicitud</strong></td><td>${applicationId}</td></tr>
         </table>

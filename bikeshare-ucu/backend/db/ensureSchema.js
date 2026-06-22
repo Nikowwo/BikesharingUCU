@@ -10,6 +10,7 @@ async function ensureRentalApplicationsTable() {
       email VARCHAR(255) NOT NULL,
       days_per_week TINYINT NULL,
       previous_transport VARCHAR(50) NULL,
+      distance_km DECIMAL(5, 2) NULL,
       address_proof_path VARCHAR(500) NULL,
       status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
       rejection_reason TEXT NULL,
@@ -23,6 +24,7 @@ async function ensureRentalApplicationsTable() {
     'ALTER TABLE rental_applications ADD COLUMN rejection_reason TEXT NULL AFTER status',
     'ALTER TABLE rental_applications ADD COLUMN days_per_week TINYINT NULL AFTER email',
     'ALTER TABLE rental_applications ADD COLUMN previous_transport VARCHAR(50) NULL AFTER days_per_week',
+    'ALTER TABLE rental_applications ADD COLUMN distance_km DECIMAL(5, 2) NULL AFTER previous_transport',
   ];
 
   for (const sql of columnMigrations) {

@@ -18,6 +18,7 @@ const EMPTY_FORM = {
   email: '',
   days_per_week: '',
   previous_transport: '',
+  distance_km: '',
 };
 
 export default function HomePage() {
@@ -37,6 +38,10 @@ export default function HomePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!file) {
+      toast.error('El comprobante de dirección es obligatorio');
+      return;
+    }
     setSubmitting(true);
     try {
       const fd = new FormData();
@@ -45,7 +50,8 @@ export default function HomePage() {
       fd.append('email', form.email);
       fd.append('days_per_week', form.days_per_week);
       fd.append('previous_transport', form.previous_transport);
-      if (file) fd.append('address_proof', file);
+      fd.append('distance_km', form.distance_km);
+      fd.append('address_proof', file);
 
       const { data } = await api.post('/contact/rental', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -180,13 +186,27 @@ export default function HomePage() {
               </select>
             </div>
             <div>
-              <p className="text-sm mb-1">¿Cambiaste de dirección?</p>
-              <label className="block text-sm mb-1">Comprobante de nueva dirección:</label>
+              <label className="block text-sm mb-1">
+                ¿A cuántos km vivís o recorrés hasta la facultad?*
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={form.distance_km}
+                onChange={(e) => setForm({ ...form, distance_km: e.target.value })}
+                className="input-underline-navy"
+                placeholder="Ej: 3.5"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Comprobante de dirección:*</label>
               <input
                 type="file"
                 accept="image/*,.pdf"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
                 className="text-sm text-ucu-navy/80 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-ucu-navy/15 file:text-ucu-navy"
+                required
               />
             </div>
             <button
