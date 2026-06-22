@@ -10,7 +10,7 @@ const USER_FIELDS =
 
 async function attachCo2Savings(user) {
   const [rows] = await db.query(
-    `SELECT l.approval_date, ra.days_per_week, ra.previous_transport, ra.distance_km
+    `SELECT l.approval_date, ra.days_per_week, ra.previous_transport, ra.distance_km, ra.is_electric
      FROM loans l
      JOIN rental_applications ra
        ON ra.user_id = l.user_id AND ra.status = 'approved'
@@ -26,6 +26,7 @@ async function attachCo2Savings(user) {
         days_per_week: rows[0].days_per_week,
         distance_km: rows[0].distance_km,
         approval_date: rows[0].approval_date,
+        is_electric: rows[0].is_electric,
       })
     : { applies: false, saved_kg: 0 };
 

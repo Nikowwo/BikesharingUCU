@@ -45,10 +45,21 @@ function daysSinceApproval(approvalDate) {
  * Estima CO₂ no emitido al usar bici en lugar del transporte anterior.
  * distance_km = ida (un tramo); se asume ida y vuelta por día de facultad.
  */
-function calculateCo2Savings({ previous_transport, days_per_week, distance_km, approval_date }) {
+function calculateCo2Savings({ previous_transport, days_per_week, distance_km, approval_date, is_electric }) {
   const transport = previous_transport?.trim();
   const daysPerWeek = Number(days_per_week);
   const distanceKm = Number(distance_km);
+  const electric = is_electric === true || is_electric === 1 || is_electric === '1';
+
+  if (electric) {
+    return {
+      applies: false,
+      saved_kg: 0,
+      is_electric: true,
+      previous_transport: transport || null,
+      previous_transport_label: TRANSPORT_LABELS[transport] || null,
+    };
+  }
 
   if (
     !transport ||

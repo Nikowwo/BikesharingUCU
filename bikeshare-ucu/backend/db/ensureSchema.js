@@ -25,6 +25,7 @@ async function ensureRentalApplicationsTable() {
     'ALTER TABLE rental_applications ADD COLUMN days_per_week TINYINT NULL AFTER email',
     'ALTER TABLE rental_applications ADD COLUMN previous_transport VARCHAR(50) NULL AFTER days_per_week',
     'ALTER TABLE rental_applications ADD COLUMN distance_km DECIMAL(5, 2) NULL AFTER previous_transport',
+    'ALTER TABLE rental_applications ADD COLUMN is_electric TINYINT(1) NOT NULL DEFAULT 0 AFTER distance_km',
   ];
 
   for (const sql of columnMigrations) {

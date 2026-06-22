@@ -113,6 +113,10 @@ export default function ProfilePage() {
                 {co2Savings.days_per_week === 1 ? 'día' : 'días'} por semana a la facultad
                 y {Number(co2Savings.distance_km)} km por tramo.
               </p>
+            ) : co2Savings?.is_electric ? (
+              <p className="text-sm text-gray-500">
+                Indicaste que tu transporte anterior era eléctrico; no aplicamos estimación de CO₂.
+              </p>
             ) : (
               <p className="text-sm text-gray-500">
                 {Number(user.co2_saved_kg || 0) > 0

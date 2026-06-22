@@ -76,6 +76,13 @@ function parseDistanceKm(value) {
   return Math.round(km * 100) / 100;
 }
 
+function parseIsElectric(value) {
+  if (value === true || value === 1 || value === '1' || value === 'true') {
+    return true;
+  }
+  return false;
+}
+
 function actionErrorPage(err) {
   const messages = {
     NOT_FOUND: 'No encontramos esa solicitud.',
@@ -337,7 +344,8 @@ router.get('/my-application', authenticateToken, async (req, res) => {
 // POST /api/contact/rental
 router.post('/rental', authenticateToken, upload.single('address_proof'), async (req, res) => {
   try {
-    const { full_name, ci, email, days_per_week, previous_transport, distance_km } = req.body;
+    const { full_name, ci, email, days_per_week, previous_transport, distance_km, is_electric } =
+      req.body;
     if (!full_name?.trim() || !ci?.trim() || !email?.trim()) {
       return res.status(400).json({ error: 'Nombre, CI y email son obligatorios' });
     }
@@ -361,6 +369,8 @@ router.post('/rental', authenticateToken, upload.single('address_proof'), async 
       return res.status(400).json({ error: 'Ingresá la distancia en km (número mayor a 0)' });
     }
 
+    const isElectric = parseIsElectric(is_electric);
+
     const transportLabel = PREVIOUS_TRANSPORT_LABELS[transportKey];
 
     const [pending] = await db.query(
@@ -383,8 +393,8 @@ router.post('/rental', authenticateToken, upload.single('address_proof'), async 
 
     const proofPath = req.file.path;
     const [result] = await db.query(
-      `INSERT INTO rental_applications (user_id, full_name, ci, email, days_per_week, previous_transport, distance_km, address_proof_path, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      `INSERT INTO rental_applications (user_id, full_name, ci, email, days_per_week, previous_transport, distance_km, is_electric, address_proof_path, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
       [
         req.user.id,
         full_name.trim(),
@@ -393,6 +403,7 @@ router.post('/rental', authenticateToken, upload.single('address_proof'), async 
         daysPerWeek,
         transportKey,
         distanceKm,
+        isElectric ? 1 : 0,
         proofPath,
       ]
     );

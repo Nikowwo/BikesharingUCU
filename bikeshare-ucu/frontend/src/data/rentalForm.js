@@ -10,6 +10,8 @@ export const PREVIOUS_TRANSPORT_OPTIONS = [
   { value: 'otro', label: 'Otro' },
 ];
 
-export function getTransportLabel(value) {
-  return PREVIOUS_TRANSPORT_OPTIONS.find((o) => o.value === value)?.label || value;
+export const MOTORIZED_TRANSPORT_VALUES = ['omnibus', 'auto', 'taxi_uber', 'motocicleta'];
+
+export function isMotorizedTransport(value) {
+  return MOTORIZED_TRANSPORT_VALUES.includes(value);
 }

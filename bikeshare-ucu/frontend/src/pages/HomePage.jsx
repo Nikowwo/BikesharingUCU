@@ -10,6 +10,7 @@ import { api } from '../lib/api';
 import {
   DAYS_PER_WEEK_OPTIONS,
   PREVIOUS_TRANSPORT_OPTIONS,
+  isMotorizedTransport,
 } from '../data/rentalForm';
 
 const EMPTY_FORM = {
@@ -19,6 +20,7 @@ const EMPTY_FORM = {
   days_per_week: '',
   previous_transport: '',
   distance_km: '',
+  is_electric: false,
 };
 
 export default function HomePage() {
@@ -51,6 +53,7 @@ export default function HomePage() {
       fd.append('days_per_week', form.days_per_week);
       fd.append('previous_transport', form.previous_transport);
       fd.append('distance_km', form.distance_km);
+      fd.append('is_electric', form.is_electric ? '1' : '0');
       fd.append('address_proof', file);
 
       const { data } = await api.post('/contact/rental', fd, {
@@ -171,7 +174,16 @@ export default function HomePage() {
               </label>
               <select
                 value={form.previous_transport}
-                onChange={(e) => setForm({ ...form, previous_transport: e.target.value })}
+                onChange={(e) => {
+                  const previous_transport = e.target.value;
+                  setForm({
+                    ...form,
+                    previous_transport,
+                    is_electric: isMotorizedTransport(previous_transport)
+                      ? form.is_electric
+                      : false,
+                  });
+                }}
                 className="select-underline-navy"
                 required
               >
@@ -199,6 +211,24 @@ export default function HomePage() {
                 required
               />
             </div>
+            {isMotorizedTransport(form.previous_transport) && (
+              <div>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.is_electric}
+                    onChange={(e) => setForm({ ...form, is_electric: e.target.checked })}
+                    className="mt-1 h-4 w-4 rounded border-ucu-navy/30 text-ucu-green focus:ring-ucu-green"
+                  />
+                  <span className="text-sm leading-snug">
+                    Era eléctrico (auto, moto u ómnibus eléctrico)
+                    <span className="block text-xs text-ucu-navy/60 mt-0.5">
+                      Si marcás esta opción, no se estimará CO₂ ahorrado en tu perfil.
+                    </span>
+                  </span>
+                </label>
+              </div>
+            )}
             <div>
               <label className="block text-sm mb-1">Comprobante de dirección:*</label>
               <input
