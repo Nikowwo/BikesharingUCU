@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const db = require('../db');
+const { ensureBikeInventory } = require('../db/ensureBikeInventory');
 
-const DEFAULT_BIKE_CODE = process.env.DEFAULT_BIKE_CODE || 'UCU-001';
 const CURRENT_SEMESTER = process.env.CURRENT_SEMESTER || '2026-S1';
 const API_PUBLIC_URL = (process.env.API_PUBLIC_URL || 'http://localhost:3001').replace(/\/$/, '');
 
@@ -36,21 +36,6 @@ function buildRejectUrl(applicationId) {
   return `${API_PUBLIC_URL}/api/contact/reject/${applicationId}?token=${token}`;
 }
 
-async function ensureDefaultBike() {
-  await db.query(
-    `INSERT INTO bikes (code, model, status, current_lat, current_lng, last_gps_update)
-     SELECT ?, 'Mountain Bike UCU', 'available', -34.8893849, -56.1585772, NOW()
-     FROM DUAL
-     WHERE NOT EXISTS (SELECT 1 FROM bikes WHERE code = ?)`,
-    [DEFAULT_BIKE_CODE, DEFAULT_BIKE_CODE]
-  );
-
-  const [rows] = await db.query('SELECT id, code, status FROM bikes WHERE code = ? LIMIT 1', [
-    DEFAULT_BIKE_CODE,
-  ]);
-  return rows[0];
-}
-
 async function assignBikeFromApplication(applicationId) {
   const [apps] = await db.query('SELECT * FROM rental_applications WHERE id = ? LIMIT 1', [
     applicationId,
@@ -75,7 +60,7 @@ async function assignBikeFromApplication(applicationId) {
     return {
       alreadyApproved: true,
       application,
-      bikeCode: loan[0]?.bike_code || DEFAULT_BIKE_CODE,
+      bikeCode: loan[0]?.bike_code || null,
       loanId: loan[0]?.id || null,
     };
   }
@@ -96,32 +81,49 @@ async function assignBikeFromApplication(applicationId) {
     throw err;
   }
 
-  const bike = await ensureDefaultBike();
-  if (bike.status === 'loaned') {
-    const err = new Error(`La bici ${DEFAULT_BIKE_CODE} no está disponible`);
-    err.code = 'BIKE_UNAVAILABLE';
+  await ensureBikeInventory();
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [bikes] = await connection.query(
+      `SELECT id, code, status FROM bikes WHERE status = 'available' ORDER BY code ASC LIMIT 1 FOR UPDATE`
+    );
+    const bike = bikes[0];
+    if (!bike) {
+      const err = new Error('No hay bicis disponibles en el inventario (UCU-001 … UCU-200)');
+      err.code = 'BIKE_UNAVAILABLE';
+      throw err;
+    }
+
+    await connection.query(
+      `UPDATE rental_applications SET status = 'approved', reviewed_at = NOW() WHERE id = ?`,
+      [applicationId]
+    );
+
+    const [loanResult] = await connection.query(
+      `INSERT INTO loans (bike_id, user_id, status, semester, approval_date)
+       VALUES (?, ?, 'active', ?, NOW())`,
+      [bike.id, application.user_id, CURRENT_SEMESTER]
+    );
+
+    await connection.query("UPDATE bikes SET status = 'loaned' WHERE id = ?", [bike.id]);
+
+    await connection.commit();
+
+    return {
+      alreadyApproved: false,
+      application,
+      bikeCode: bike.code,
+      loanId: loanResult.insertId,
+    };
+  } catch (err) {
+    await connection.rollback();
     throw err;
+  } finally {
+    connection.release();
   }
-
-  await db.query(
-    `UPDATE rental_applications SET status = 'approved', reviewed_at = NOW() WHERE id = ?`,
-    [applicationId]
-  );
-
-  const [loanResult] = await db.query(
-    `INSERT INTO loans (bike_id, user_id, status, semester, approval_date)
-     VALUES (?, ?, 'active', ?, NOW())`,
-    [bike.id, application.user_id, CURRENT_SEMESTER]
-  );
-
-  await db.query("UPDATE bikes SET status = 'loaned' WHERE id = ?", [bike.id]);
-
-  return {
-    alreadyApproved: false,
-    application,
-    bikeCode: bike.code,
-    loanId: loanResult.insertId,
-  };
 }
 
 async function rejectApplication(applicationId, rejectionReason = null) {
@@ -230,7 +232,6 @@ function renderActionPage({ title, message, tone = 'info', actions = [] }) {
 
 module.exports = {
   API_PUBLIC_URL,
-  DEFAULT_BIKE_CODE,
   buildApproveUrl,
   buildRejectUrl,
   verifyApplicationToken,

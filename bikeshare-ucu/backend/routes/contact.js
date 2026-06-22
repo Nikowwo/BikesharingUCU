@@ -6,7 +6,6 @@ const multer = require('multer');
 const db = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 const {
-  DEFAULT_BIKE_CODE,
   buildApproveUrl,
   buildRejectUrl,
   verifyApplicationToken,
@@ -120,7 +119,8 @@ router.get('/approve/:id', async (req, res) => {
     return res.send(
       renderActionPage({
         title: 'Aprobar solicitud',
-        message: `¿Asignar la bici <strong>${DEFAULT_BIKE_CODE}</strong> a esta solicitud? El usuario la verá en <em>Mi Bici</em>.`,
+        message:
+          '¿Aprobar esta solicitud? Se asignará la próxima bici disponible del inventario (UCU-001 … UCU-200). El usuario la verá en <em>Mi Bici</em>.',
         tone: 'info',
         actions: [
           { href: approveUrl, label: 'Aprobar y asignar bici', primary: true },
@@ -431,7 +431,7 @@ Transporte anterior: ${transportLabel}
 ID usuario en sistema: ${req.user.id}
 ID solicitud: ${applicationId}
 
-Aprobar y asignar bici (${DEFAULT_BIKE_CODE}):
+Aprobar y asignar bici (próxima disponible UCU-001 … UCU-200):
 ${approveUrl}
 
 Rechazar solicitud:
@@ -455,7 +455,7 @@ Fecha: ${new Date().toLocaleString('es-UY')}
         </table>
         <p style="margin:0 0 12px;">
           <a href="${approveUrl}" style="display:inline-block;padding:14px 22px;background:#2d6a4f;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:700;margin-right:10px;">
-            Aprobar y asignar ${DEFAULT_BIKE_CODE}
+            Aprobar y asignar bici
           </a>
           <a href="${rejectUrl}" style="display:inline-block;padding:14px 22px;background:#6c757d;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:700;">
             Rechazar

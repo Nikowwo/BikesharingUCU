@@ -10,6 +10,7 @@ const loansRoutes = require('./routes/loans');
 const reportsRoutes = require('./routes/reports');
 const contactRoutes = require('./routes/contact');
 const { ensureRentalApplicationsTable } = require('./db/ensureSchema');
+const { ensureBikeInventory, BIKE_INVENTORY_SIZE } = require('./db/ensureBikeInventory');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -42,12 +43,16 @@ app.use('/api/reports', reportsRoutes);
 app.use('/api/contact', contactRoutes);
 
 ensureRentalApplicationsTable()
+  .then(() => ensureBikeInventory())
   .then(() => {
     const brevoReady = Boolean(process.env.BREVO_API_KEY);
     const smtpReady = Boolean(process.env.SMTP_USER && process.env.SMTP_PASS);
     const resendReady = Boolean(process.env.RESEND_API_KEY);
     console.log(
       `[mailer] Email: Brevo=${brevoReady ? 'sí' : 'no'} | SMTP=${smtpReady ? process.env.SMTP_USER : 'no'} | Resend=${resendReady ? 'sí' : 'no'}`
+    );
+    console.log(
+      `[bikes] Inventario verificado: UCU-001 … UCU-${String(BIKE_INVENTORY_SIZE).padStart(3, '0')}`
     );
     app.listen(PORT, () => {
       console.log(`[server] BikeShare UCU API escuchando en http://localhost:${PORT}`);
