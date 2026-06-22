@@ -24,7 +24,8 @@ export function rentalEndDate(approvalDate) {
 }
 
 export function daysRemaining(approvalDate) {
-  const end = rentalEndDate(approvalDate);
-  if (!end) return RENTAL_DAYS;
-  return Math.max(0, Math.ceil((end - Date.now()) / (1000 * 60 * 60 * 24)));
+  const start = parseDbDate(approvalDate);
+  if (!start || Number.isNaN(start.getTime())) return RENTAL_DAYS;
+  const elapsed = Math.floor((Date.now() - start.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(0, RENTAL_DAYS - elapsed);
 }
