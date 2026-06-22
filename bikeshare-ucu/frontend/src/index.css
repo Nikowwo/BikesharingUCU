@@ -70,12 +70,8 @@ body {
   @apply w-full bg-transparent border-b border-white/60 py-2 text-white placeholder:text-white/50 outline-none focus:border-white;
 }
 
-.input-rental {
-  @apply w-full bg-ucu-navy text-white rounded-lg px-4 py-3 text-sm outline-none transition-colors placeholder:text-white/50;
-}
-
-.input-rental:focus {
-  @apply ring-2 ring-ucu-navy/40 ring-offset-2 ring-offset-ucu-card;
+.input-underline-navy {
+  @apply w-full bg-transparent border-b border-ucu-navy/60 py-2 text-ucu-navy placeholder:text-ucu-navy/50 outline-none focus:border-ucu-navy;
 }
 
 .btn-navy {

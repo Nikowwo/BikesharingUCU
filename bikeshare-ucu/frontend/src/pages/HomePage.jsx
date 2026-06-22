@@ -90,63 +90,58 @@ export default function HomePage() {
 
       <section
         id="formulario"
-        className="bg-ucu-cream text-ucu-navy px-6 pt-28 pb-16 min-h-[calc(100vh-4rem)] flex flex-col justify-center"
+        className="bg-ucu-cream text-ucu-navy px-6 pt-28 pb-16 min-h-[calc(100vh-4rem)] flex flex-col justify-center -mt-px"
       >
         <div className="max-w-xl mx-auto w-full py-6 md:py-8">
-          <h2 className="font-syne font-bold text-2xl md:text-3xl text-center mb-8 text-ucu-navy">
-            Alquilá tu bici acá
-          </h2>
-          <form
-            onSubmit={handleSubmit}
-            className="bg-ucu-card rounded-2xl p-8 md:p-10 shadow-lg space-y-5 md:space-y-6"
-          >
+          <h2 className="font-syne font-bold text-2xl md:text-3xl text-center mb-8">Alquilá tu bici acá</h2>
+          <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
             <div>
-              <label className="block text-sm mb-1 text-ucu-navy">Nombre Completo:*</label>
+              <label className="block text-sm mb-1">Nombre Completo:*</label>
               <input
                 type="text"
                 value={form.full_name}
                 onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-                className="input-rental"
+                className="input-underline-navy"
                 placeholder=""
                 required
               />
             </div>
             <div>
-              <label className="block text-sm mb-1 text-ucu-navy">CI:*</label>
+              <label className="block text-sm mb-1">CI:*</label>
               <input
                 type="text"
                 value={form.ci}
                 onChange={(e) => setForm({ ...form, ci: e.target.value })}
-                className="input-rental"
+                className="input-underline-navy"
                 placeholder=""
                 required
               />
             </div>
             <div>
-              <label className="block text-sm mb-1 text-ucu-navy">Correo Electrónico:*</label>
+              <label className="block text-sm mb-1">Correo Electrónico:*</label>
               <input
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="input-rental"
+                className="input-underline-navy"
                 placeholder=""
                 required
               />
             </div>
             <div>
-              <p className="text-sm mb-1 text-ucu-navy">¿Cambiaste de dirección?</p>
-              <label className="block text-sm mb-1 text-ucu-navy">Comprobante de nueva dirección:</label>
+              <p className="text-sm mb-1">¿Cambiaste de dirección?</p>
+              <label className="block text-sm mb-1">Comprobante de nueva dirección:</label>
               <input
                 type="file"
                 accept="image/*,.pdf"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="text-sm text-ucu-navy file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-ucu-navy file:text-white"
+                className="text-sm text-ucu-navy/80 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-ucu-navy/15 file:text-ucu-navy"
               />
             </div>
             <button
               type="submit"
               disabled={submitting}
-              className="btn-navy px-8 py-2 rounded-full disabled:opacity-60"
+              className="bg-ucu-navy text-ucu-cream px-8 py-2 rounded-full font-medium hover:bg-ucu-navy/90 disabled:opacity-60"
             >
               {submitting ? 'Enviando...' : 'Enviar'}
             </button>
