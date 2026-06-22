@@ -16,6 +16,15 @@ export default {
         asap: ['Asap', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
       },
+      fontSize: {
+        /* Títulos Asap: +6px vs escala Tailwind; line-height = tamaño + 5px */
+        'heading-sm': ['24px', { lineHeight: '29px' }],
+        'heading-md': ['26px', { lineHeight: '31px' }],
+        'heading-lg': ['30px', { lineHeight: '35px' }],
+        'heading-xl': ['36px', { lineHeight: '41px' }],
+        'heading-2xl': ['54px', { lineHeight: '59px' }],
+        'heading-base': ['22px', { lineHeight: '27px' }],
+      },
     },
   },
   plugins: [],
