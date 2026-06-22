@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AppLayout from '../layouts/AppLayout';
@@ -20,6 +20,7 @@ const EMPTY_FORM = {
   previous_transport: '',
   distance_km: '',
   is_electric: false,
+  accepted_terms: false,
 };
 
 export default function HomePage() {
@@ -41,6 +42,10 @@ export default function HomePage() {
     e.preventDefault();
     if (!file) {
       toast.error('El comprobante de dirección es obligatorio');
+      return;
+    }
+    if (!form.accepted_terms) {
+      toast.error('Debés leer y aceptar los Términos y Condiciones');
       return;
     }
     setSubmitting(true);
@@ -226,6 +231,27 @@ export default function HomePage() {
                 className="text-sm text-ucu-navy/80 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-ucu-navy/15 file:text-ucu-navy"
                 required
               />
+            </div>
+            <div>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.accepted_terms}
+                  onChange={(e) => setForm({ ...form, accepted_terms: e.target.checked })}
+                  className="mt-1 h-4 w-4 rounded border-ucu-navy/30 text-ucu-green focus:ring-ucu-green"
+                  required
+                />
+                <span className="text-sm leading-snug">
+                  Leí y acepto los{' '}
+                  <Link
+                    to="/terminos"
+                    className="text-ucu-green underline font-medium hover:text-ucu-navy"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Términos y Condiciones
+                  </Link>
+                </span>
+              </label>
             </div>
             <button
               type="submit"
