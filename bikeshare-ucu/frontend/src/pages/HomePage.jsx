@@ -90,11 +90,16 @@ export default function HomePage() {
 
       <section
         id="formulario"
-        className="bg-ucu-navy text-white px-6 pt-28 pb-16 min-h-[calc(100vh-4rem)] flex flex-col justify-center -mt-px"
+        className="bg-ucu-cream text-ucu-navy px-6 pt-28 pb-16 min-h-[calc(100vh-4rem)] flex flex-col justify-center"
       >
         <div className="max-w-xl mx-auto w-full py-6 md:py-8">
-          <h2 className="font-syne font-bold text-2xl md:text-3xl text-center mb-8">Alquilá tu bici acá</h2>
-          <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+          <h2 className="font-syne font-bold text-2xl md:text-3xl text-center mb-8 text-ucu-navy">
+            Alquilá tu bici acá
+          </h2>
+          <form
+            onSubmit={handleSubmit}
+            className="bg-ucu-navy text-white rounded-2xl p-8 md:p-10 shadow-xl space-y-5 md:space-y-6"
+          >
             <div>
               <label className="block text-sm mb-1">Nombre Completo:*</label>
               <input
@@ -141,7 +146,7 @@ export default function HomePage() {
             <button
               type="submit"
               disabled={submitting}
-              className="bg-gray-200 text-ucu-navy px-8 py-2 rounded-full font-medium hover:bg-white disabled:opacity-60"
+              className="bg-ucu-cream text-ucu-navy px-8 py-2 rounded-full font-medium hover:bg-white disabled:opacity-60"
             >
               {submitting ? 'Enviando...' : 'Enviar'}
             </button>
