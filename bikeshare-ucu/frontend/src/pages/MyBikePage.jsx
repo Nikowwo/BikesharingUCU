@@ -1,24 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Circle, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
 import { AlertTriangle, Radio } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AppLayout from '../layouts/AppLayout';
-import BikeMarker from '../components/BikeMarker';
-import MapResize from '../components/MapResize';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
-import { UCU_LAT, UCU_LNG, UCU_MAP_ZOOM, MAX_RADIUS_KM, isOutOfRange } from '../lib/geo';
+import { isOutOfRange } from '../lib/geo';
 import { daysRemaining, rentalEndDate } from '../lib/rental';
-
-import 'leaflet/dist/leaflet.css';
-
-const campusIcon = L.divIcon({
-  className: '',
-  html: `<div style="background:#52B788;color:white;padding:4px 8px;border-radius:8px;font-size:11px;font-weight:600;white-space:nowrap;border:2px solid white;">🏛️ UCU</div>`,
-  iconAnchor: [30, 15],
-});
 
 function formatDate(iso) {
   if (!iso) return '—';
@@ -126,43 +114,11 @@ export default function MyBikePage() {
   return (
     <AppLayout className="page-bg-bikes">
       <main className="px-4 py-10 min-h-[calc(100vh-7rem)]">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-6 lg:items-stretch">
-          <div className="bg-ucu-card rounded-2xl p-6 shadow-xl flex flex-col h-full">
-            <h2 className="font-syne font-bold text-xl text-ucu-navy text-center mb-4 shrink-0">
-              Encontrá tu bici
-            </h2>
-            <div className="bike-map-panel">
-              <div className="bike-map-wrap">
-                <MapContainer
-                  center={[UCU_LAT, UCU_LNG]}
-                  zoom={UCU_MAP_ZOOM}
-                  className="h-full w-full"
-                  scrollWheelZoom
-                >
-                  <MapResize />
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <Circle
-                  center={[UCU_LAT, UCU_LNG]}
-                  radius={MAX_RADIUS_KM * 1000}
-                  pathOptions={{ color: '#52B788', fillColor: '#52B788', fillOpacity: 0.15 }}
-                />
-                <Marker position={[UCU_LAT, UCU_LNG]} icon={campusIcon}>
-                  <Popup>Universidad Católica del Uruguay</Popup>
-                </Marker>
-                <BikeMarker
-                  lat={bike.current_lat}
-                  lng={bike.current_lng}
-                  lastGpsUpdate={bike.last_gps_update}
-                />
-                </MapContainer>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-6">
-            <div className="bg-ucu-card rounded-2xl p-8 shadow-xl">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="grid md:grid-cols-2 gap-6 items-stretch">
+            <div className="bg-ucu-card rounded-2xl p-8 shadow-xl flex flex-col">
               <h3 className="font-syne font-bold text-lg text-ucu-navy mb-4">Tu bicicleta</h3>
-              <dl className="space-y-2 text-sm">
+              <dl className="space-y-2 text-sm flex-1">
                 <div className="flex justify-between">
                   <dt className="text-gray-500">Código</dt>
                   <dd className="font-bold text-ucu-green">{bike.code}</dd>
@@ -189,75 +145,64 @@ export default function MyBikePage() {
                 </div>
               </dl>
               {gpsStale && (
-                <div className="mt-3 flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs">
-                  <Radio className="w-4 h-4" />
+                <div className="mt-4 flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs">
+                  <Radio className="w-4 h-4 shrink-0" />
                   GPS sin señal reciente
                 </div>
               )}
               {outOfRange && (
                 <div className="mt-3 flex items-center gap-2 text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs">
-                  <AlertTriangle className="w-4 h-4" />
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
                   Fuera del rango de 5 km del campus
                 </div>
               )}
             </div>
 
-            <div className="bg-ucu-card rounded-2xl p-10 shadow-xl flex flex-col items-center justify-center text-center gap-2">
+            <div className="bg-ucu-card rounded-2xl p-8 shadow-xl flex flex-col items-center justify-center text-center">
               <p className="font-syne font-bold text-2xl md:text-3xl text-ucu-navy leading-snug">
                 Faltan {daysLeft} días de tu alquiler
               </p>
               {endDate && (
-                <p className="text-sm text-gray-500">
-                  Vence el {endDate.toLocaleDateString('es-UY', { day: '2-digit', month: 'long', year: 'numeric' })}
+                <p className="text-sm text-gray-500 mt-2">
+                  Vence el{' '}
+                  {endDate.toLocaleDateString('es-UY', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
                 </p>
               )}
             </div>
+          </div>
 
-            {bike.co2_savings?.applies && (
-              <div className="bg-ucu-card rounded-2xl p-8 shadow-xl text-center">
-                <h3 className="font-syne font-bold text-lg text-ucu-green mb-2">CO₂ ahorrado</h3>
-                <p className="font-syne font-bold text-4xl text-ucu-navy mb-2">
-                  {Number(bike.co2_savings.saved_kg).toFixed(1)} kg
-                </p>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  Estimado desde que usás la bici en lugar de{' '}
-                  <strong>{bike.co2_savings.previous_transport_label}</strong>, con{' '}
-                  {bike.co2_savings.days_per_week}{' '}
-                  {bike.co2_savings.days_per_week === 1 ? 'día' : 'días'} por semana a la facultad
-                  y {Number(bike.co2_savings.distance_km)} km por tramo.
-                </p>
-              </div>
-            )}
-
-            <div className="bg-ucu-card rounded-2xl p-8 shadow-xl">
-              <h3 className="font-syne font-bold text-lg text-ucu-navy mb-3">
-                ¿Querés devolver la bici?
-              </h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                Si querés devolver tu bicicleta alquilada, clickeá{' '}
-                <button
-                  type="button"
-                  disabled={returnInProgress}
-                  onClick={async () => {
-                    try {
-                      const { data } = await api.post(`/loans/${bike.loan_id}/request-return`);
-                      toast.success(
-                        data.email_sent
-                          ? 'Solicitud enviada por email a Bedelías'
-                          : 'Solicitud registrada (email no enviado — revisá SMTP)'
-                      );
-                      loadBike();
-                    } catch (err) {
-                      toast.error(err.response?.data?.error || 'Error al solicitar devolución');
-                    }
-                  }}
-                  className="text-blue-600 underline disabled:opacity-50"
-                >
-                  aquí
-                </button>{' '}
-                para solicitar la devolución.
-              </p>
-            </div>
+          <div className="bg-ucu-card rounded-2xl p-8 shadow-xl">
+            <h3 className="font-syne font-bold text-lg text-ucu-navy mb-3">
+              ¿Querés devolver la bici?
+            </h3>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Si querés devolver tu bicicleta alquilada, clickeá{' '}
+              <button
+                type="button"
+                disabled={returnInProgress}
+                onClick={async () => {
+                  try {
+                    const { data } = await api.post(`/loans/${bike.loan_id}/request-return`);
+                    toast.success(
+                      data.email_sent
+                        ? 'Solicitud enviada por email a Bedelías'
+                        : 'Solicitud registrada (email no enviado — revisá SMTP)'
+                    );
+                    loadBike();
+                  } catch (err) {
+                    toast.error(err.response?.data?.error || 'Error al solicitar devolución');
+                  }
+                }}
+                className="text-blue-600 underline disabled:opacity-50"
+              >
+                aquí
+              </button>{' '}
+              para solicitar la devolución.
+            </p>
           </div>
         </div>
       </main>

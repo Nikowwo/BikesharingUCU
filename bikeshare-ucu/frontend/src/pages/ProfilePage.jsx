@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -55,12 +55,21 @@ function EditableField({ label, value, field, onSave }) {
 }
 
 export default function ProfilePage() {
-  const { user, loading, updateProfile, logout } = useAuth();
+  const { user, loading, updateProfile, logout, refreshUser } = useAuth();
+
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
   }
   if (!user) return <Navigate to="/" replace />;
+
+  const co2Savings = user.co2_savings;
+  const co2Kg = co2Savings?.applies
+    ? Number(co2Savings.saved_kg)
+    : Number(user.co2_saved_kg || 0);
 
   return (
     <AppLayout className="page-bg-bikes">
@@ -92,12 +101,25 @@ export default function ProfilePage() {
           </div>
 
           <div className="bg-ucu-card rounded-2xl p-8 shadow-xl flex flex-col items-center justify-center text-center">
-            <h2 className="font-syne font-bold text-2xl text-ucu-green mb-6">CO2 Ahorrado</h2>
-            <p className="text-gray-600 mb-4">Gracias a tus viajes en bici redujiste:</p>
-            <p className="font-syne font-bold text-5xl text-ucu-navy mb-2">
-              {Number(user.co2_saved_kg || 0).toFixed(0)} kg
+            <h2 className="font-syne font-bold text-2xl text-ucu-green mb-4">CO₂ ahorrado</h2>
+            <p className="font-syne font-bold text-5xl text-ucu-navy mb-3">
+              {co2Kg.toFixed(1)} kg
             </p>
-            <p className="text-gray-500">De CO2</p>
+            {co2Savings?.applies ? (
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Estimado desde que usás la bici en lugar de{' '}
+                <strong>{co2Savings.previous_transport_label}</strong>, con{' '}
+                {co2Savings.days_per_week}{' '}
+                {co2Savings.days_per_week === 1 ? 'día' : 'días'} por semana a la facultad
+                y {Number(co2Savings.distance_km)} km por tramo.
+              </p>
+            ) : (
+              <p className="text-sm text-gray-500">
+                {Number(user.co2_saved_kg || 0) > 0
+                  ? 'Total acumulado en tus alquileres.'
+                  : 'El cálculo aplica con bici activa y transporte anterior auto, ómnibus, taxi/uber o moto.'}
+              </p>
+            )}
           </div>
         </div>
       </main>
