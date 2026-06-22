@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { AlertTriangle, Radio } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AppLayout from '../layouts/AppLayout';
 import { useAuth } from '../context/AuthContext';
@@ -15,11 +15,6 @@ function formatDate(iso) {
     month: 'long',
     year: 'numeric',
   });
-}
-
-function isGpsStale(lastUpdate) {
-  if (!lastUpdate) return true;
-  return Date.now() - new Date(lastUpdate).getTime() > 60 * 60 * 1000;
 }
 
 export default function MyBikePage() {
@@ -108,7 +103,6 @@ export default function MyBikePage() {
     bike.current_lat != null &&
     bike.current_lng != null &&
     isOutOfRange(bike.current_lat, bike.current_lng);
-  const gpsStale = isGpsStale(bike.last_gps_update);
   const returnInProgress = bike.loan_status === 'return_requested';
 
   return (
@@ -144,12 +138,6 @@ export default function MyBikePage() {
                   </dd>
                 </div>
               </dl>
-              {gpsStale && (
-                <div className="mt-4 flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs">
-                  <Radio className="w-4 h-4 shrink-0" />
-                  GPS sin señal reciente
-                </div>
-              )}
               {outOfRange && (
                 <div className="mt-3 flex items-center gap-2 text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs">
                   <AlertTriangle className="w-4 h-4 shrink-0" />
