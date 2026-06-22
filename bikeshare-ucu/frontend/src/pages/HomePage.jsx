@@ -98,55 +98,55 @@ export default function HomePage() {
           </h2>
           <form
             onSubmit={handleSubmit}
-            className="bg-ucu-navy text-white rounded-2xl p-8 md:p-10 shadow-xl space-y-5 md:space-y-6"
+            className="bg-ucu-card rounded-2xl p-8 md:p-10 shadow-lg space-y-5 md:space-y-6"
           >
             <div>
-              <label className="block text-sm mb-1">Nombre Completo:*</label>
+              <label className="block text-sm mb-1 text-ucu-navy">Nombre Completo:*</label>
               <input
                 type="text"
                 value={form.full_name}
                 onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-                className="input-underline"
+                className="input-rental"
                 placeholder=""
                 required
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">CI:*</label>
+              <label className="block text-sm mb-1 text-ucu-navy">CI:*</label>
               <input
                 type="text"
                 value={form.ci}
                 onChange={(e) => setForm({ ...form, ci: e.target.value })}
-                className="input-underline"
+                className="input-rental"
                 placeholder=""
                 required
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">Correo Electrónico:*</label>
+              <label className="block text-sm mb-1 text-ucu-navy">Correo Electrónico:*</label>
               <input
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="input-underline"
+                className="input-rental"
                 placeholder=""
                 required
               />
             </div>
             <div>
-              <p className="text-sm mb-1">¿Cambiaste de dirección?</p>
-              <label className="block text-sm mb-1">Comprobante de nueva dirección:</label>
+              <p className="text-sm mb-1 text-ucu-navy">¿Cambiaste de dirección?</p>
+              <label className="block text-sm mb-1 text-ucu-navy">Comprobante de nueva dirección:</label>
               <input
                 type="file"
                 accept="image/*,.pdf"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="text-sm text-white/80 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-white/20 file:text-white"
+                className="text-sm text-ucu-navy file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-ucu-navy file:text-white"
               />
             </div>
             <button
               type="submit"
               disabled={submitting}
-              className="bg-ucu-cream text-ucu-navy px-8 py-2 rounded-full font-medium hover:bg-white disabled:opacity-60"
+              className="btn-navy px-8 py-2 rounded-full disabled:opacity-60"
             >
               {submitting ? 'Enviando...' : 'Enviar'}
             </button>
