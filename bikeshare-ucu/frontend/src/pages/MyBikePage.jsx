@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AppLayout from '../layouts/AppLayout';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 import { isOutOfRange } from '../lib/geo';
@@ -22,6 +23,8 @@ export default function MyBikePage() {
   const [bike, setBike] = useState(undefined);
   const [application, setApplication] = useState(null);
   const [fetching, setFetching] = useState(true);
+  const [returnConfirmOpen, setReturnConfirmOpen] = useState(false);
+  const [returnSubmitting, setReturnSubmitting] = useState(false);
 
   const loadBike = useCallback(async () => {
     try {
@@ -105,6 +108,24 @@ export default function MyBikePage() {
     isOutOfRange(bike.current_lat, bike.current_lng);
   const returnInProgress = bike.loan_status === 'return_requested';
 
+  const handleRequestReturn = async () => {
+    setReturnSubmitting(true);
+    try {
+      const { data } = await api.post(`/loans/${bike.loan_id}/request-return`);
+      toast.success(
+        data.email_sent
+          ? 'Solicitud enviada por email a Bedelías'
+          : 'Solicitud registrada (email no enviado — revisá SMTP)'
+      );
+      setReturnConfirmOpen(false);
+      loadBike();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Error al solicitar devolución');
+    } finally {
+      setReturnSubmitting(false);
+    }
+  };
+
   return (
     <AppLayout className="page-bg-bikes">
       <main className="px-4 py-10 min-h-[calc(100vh-7rem)]">
@@ -172,19 +193,7 @@ export default function MyBikePage() {
               <button
                 type="button"
                 disabled={returnInProgress}
-                onClick={async () => {
-                  try {
-                    const { data } = await api.post(`/loans/${bike.loan_id}/request-return`);
-                    toast.success(
-                      data.email_sent
-                        ? 'Solicitud enviada por email a Bedelías'
-                        : 'Solicitud registrada (email no enviado — revisá SMTP)'
-                    );
-                    loadBike();
-                  } catch (err) {
-                    toast.error(err.response?.data?.error || 'Error al solicitar devolución');
-                  }
-                }}
+                onClick={() => setReturnConfirmOpen(true)}
                 className="text-blue-600 underline disabled:opacity-50"
               >
                 aquí
@@ -194,6 +203,16 @@ export default function MyBikePage() {
           </div>
         </div>
       </main>
+
+      <ConfirmDialog
+        open={returnConfirmOpen}
+        title="Devolver bicicleta"
+        message="¿Querés solicitar la devolución de tu bicicleta? Bedelías recibirá tu pedido por email."
+        confirmText="Solicitar devolución"
+        onConfirm={handleRequestReturn}
+        onCancel={() => setReturnConfirmOpen(false)}
+        loading={returnSubmitting}
+      />
     </AppLayout>
   );
 }

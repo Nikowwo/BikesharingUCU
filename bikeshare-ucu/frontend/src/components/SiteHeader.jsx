@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LogOut, User } from 'lucide-react';
 import HeaderLogo from './HeaderLogo';
+import ConfirmDialog from './ConfirmDialog';
 import { useAuth } from '../context/AuthContext';
 
 /** Altura fija del header en toda la app */
@@ -39,6 +40,7 @@ export default function SiteHeader({ variant = 'auth', logoTo }) {
   const { user, logout } = useAuth();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const navBtn = (path) =>
     `px-4 sm:px-6 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
@@ -90,7 +92,7 @@ export default function SiteHeader({ variant = 'auth', logoTo }) {
               </button>
               <button
                 type="button"
-                onClick={logout}
+                onClick={() => setLogoutOpen(true)}
                 className="p-2 rounded-lg hover:bg-white/10 text-white shrink-0"
                 title="Cerrar sesión"
               >
@@ -100,6 +102,19 @@ export default function SiteHeader({ variant = 'auth', logoTo }) {
           ) : null}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={logoutOpen}
+        title="Cerrar sesión"
+        message="¿Estás seguro de que querés cerrar sesión?"
+        confirmText="Cerrar sesión"
+        onConfirm={() => {
+          logout();
+          setLogoutOpen(false);
+        }}
+        onCancel={() => setLogoutOpen(false)}
+        danger
+      />
     </header>
   );
 }

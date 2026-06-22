@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AppLayout from '../layouts/AppLayout';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { useAuth } from '../context/AuthContext';
 
 function EditableField({ label, value, field, onSave }) {
@@ -56,6 +57,7 @@ function EditableField({ label, value, field, onSave }) {
 
 export default function ProfilePage() {
   const { user, loading, updateProfile, logout, refreshUser } = useAuth();
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   useEffect(() => {
     refreshUser();
@@ -93,7 +95,7 @@ export default function ProfilePage() {
             </div>
             <button
               type="button"
-              onClick={logout}
+              onClick={() => setLogoutOpen(true)}
               className="mt-8 text-red-600 text-sm font-medium hover:underline"
             >
               Cerrar Sesión
@@ -127,6 +129,19 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
+
+      <ConfirmDialog
+        open={logoutOpen}
+        title="Cerrar sesión"
+        message="¿Estás seguro de que querés cerrar sesión?"
+        confirmText="Cerrar sesión"
+        onConfirm={() => {
+          logout();
+          setLogoutOpen(false);
+        }}
+        onCancel={() => setLogoutOpen(false)}
+        danger
+      />
     </AppLayout>
   );
 }
