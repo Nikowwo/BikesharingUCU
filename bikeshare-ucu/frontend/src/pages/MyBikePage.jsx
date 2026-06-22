@@ -80,7 +80,7 @@ export default function MyBikePage() {
       <AppLayout className="page-bg-bikes">
         <main className="min-h-[calc(100vh-7rem)] flex items-center justify-center px-4 py-12">
           <div className="bg-ucu-card rounded-2xl p-10 max-w-md text-center shadow-xl">
-            <h1 className="font-asap font-bold text-2xl text-ucu-green mb-4">
+            <h1 className="font-asap font-semibold text-2xl text-ucu-green mb-4">
               {pendingApp ? 'Solicitud en revisión' : 'Sin bici activa'}
             </h1>
             <p className="text-gray-600 mb-6">
@@ -111,7 +111,7 @@ export default function MyBikePage() {
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="grid md:grid-cols-2 gap-6 items-stretch">
             <div className="bg-ucu-card rounded-2xl p-8 shadow-xl flex flex-col">
-              <h3 className="font-asap font-bold text-lg text-ucu-navy mb-4">Tu bicicleta</h3>
+              <h3 className="font-asap font-semibold text-lg text-ucu-navy mb-4">Tu bicicleta</h3>
               <dl className="space-y-2 text-sm flex-1">
                 <div className="flex justify-between">
                   <dt className="text-gray-500">Código</dt>
@@ -147,7 +147,7 @@ export default function MyBikePage() {
             </div>
 
             <div className="bg-ucu-card rounded-2xl p-8 shadow-xl flex flex-col items-center justify-center text-center">
-              <p className="font-asap font-bold text-2xl md:text-3xl text-ucu-navy leading-snug">
+              <p className="font-asap font-semibold text-2xl md:text-3xl text-ucu-navy leading-snug">
                 Faltan {daysLeft} días de tu alquiler
               </p>
               {endDate && (
@@ -164,7 +164,7 @@ export default function MyBikePage() {
           </div>
 
           <div className="bg-ucu-card rounded-2xl p-8 shadow-xl text-center">
-            <h3 className="font-asap font-bold text-lg text-ucu-navy mb-3">
+            <h3 className="font-asap font-semibold text-lg text-ucu-navy mb-3">
               ¿Querés devolver la bici?
             </h3>
             <p className="text-sm text-gray-600 leading-relaxed mx-auto max-w-xl">
