@@ -197,6 +197,19 @@ export default function HomePage() {
                 ))}
               </select>
             </div>
+            {isMotorizedTransport(form.previous_transport) && (
+              <div>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.is_electric}
+                    onChange={(e) => setForm({ ...form, is_electric: e.target.checked })}
+                    className="h-4 w-4 rounded border-ucu-navy/30 text-ucu-green focus:ring-ucu-green"
+                  />
+                  <span className="text-sm">Es eléctrico</span>
+                </label>
+              </div>
+            )}
             <div>
               <label className="block text-sm mb-1">
                 ¿A cuántos km vivís o recorrés hasta la facultad?*
@@ -211,24 +224,6 @@ export default function HomePage() {
                 required
               />
             </div>
-            {isMotorizedTransport(form.previous_transport) && (
-              <div>
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.is_electric}
-                    onChange={(e) => setForm({ ...form, is_electric: e.target.checked })}
-                    className="mt-1 h-4 w-4 rounded border-ucu-navy/30 text-ucu-green focus:ring-ucu-green"
-                  />
-                  <span className="text-sm leading-snug">
-                    Era eléctrico (auto, moto u ómnibus eléctrico)
-                    <span className="block text-xs text-ucu-navy/60 mt-0.5">
-                      Si marcás esta opción, no se estimará CO₂ ahorrado en tu perfil.
-                    </span>
-                  </span>
-                </label>
-              </div>
-            )}
             <div>
               <label className="block text-sm mb-1">Comprobante de dirección:*</label>
               <input
