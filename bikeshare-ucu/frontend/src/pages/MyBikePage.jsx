@@ -128,8 +128,8 @@ export default function MyBikePage() {
 
   return (
     <AppLayout className="page-bg-bikes">
-      <main className="px-4 py-10 min-h-[calc(100vh-7rem)]">
-        <div className="max-w-4xl mx-auto space-y-6">
+      <main className="min-h-[calc(100vh-7rem)] flex items-center justify-center px-4 py-12">
+        <div className="max-w-4xl w-full space-y-6">
           <div className="grid md:grid-cols-2 gap-6 items-stretch">
             <div className="bg-ucu-card rounded-2xl p-8 shadow-xl flex flex-col">
               <h3 className="font-asap font-semibold text-heading-sm text-ucu-navy mb-4">Tu bicicleta</h3>
