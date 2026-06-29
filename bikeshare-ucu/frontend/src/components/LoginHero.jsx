@@ -15,9 +15,9 @@ export default function LoginHero() {
             ¿Estudiás en la UCU y querés alquilar una bici?
           </h2>
           <p className="text-sm leading-relaxed text-white/90">
-            Acá te ofrecemos una amplia variedad de bicis para alquilar. Es crucial para nosotros
-            cuidar el medio ambiente, y también, la salud de todos nuestros estudiantes. Formá parte
-            del cambio y empezá a moverte en bici. Cuidate y cuidanos a todos.
+            Te ofrecemos una amplia variedad de bicis para alquilar. Es crucial para nosotros
+            cuidar el medio ambiente y, también, la salud de todos nuestros estudiantes y funcionarios.
+            Formá parte del cambio y empezá a moverte en bici. Cuidate y cuidanos a todos.
           </p>
         </div>
       </div>
