@@ -7,7 +7,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 import { isOutOfRange } from '../lib/geo';
-import { daysRemaining, rentalEndDate } from '../lib/rental';
+import { daysRemaining, formatReturnWindowRange } from '../lib/rental';
 
 function formatDate(iso) {
   if (!iso) return '—';
@@ -101,7 +101,7 @@ export default function MyBikePage() {
   }
 
   const daysLeft = daysRemaining(bike.approval_date);
-  const endDate = rentalEndDate(bike.approval_date);
+  const returnWindowText = formatReturnWindowRange(bike.approval_date);
   const outOfRange =
     bike.current_lat != null &&
     bike.current_lng != null &&
@@ -171,14 +171,9 @@ export default function MyBikePage() {
               <p className="font-asap font-semibold text-heading-lg md:text-heading-xl text-ucu-navy">
                 Faltan {daysLeft} días de tu alquiler
               </p>
-              {endDate && (
+              {returnWindowText && (
                 <p className="text-sm text-gray-500 mt-2">
-                  Vence el{' '}
-                  {endDate.toLocaleDateString('es-UY', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric',
-                  })}
+                  Devolución {returnWindowText}
                 </p>
               )}
             </div>
