@@ -11,6 +11,7 @@ import {
   DAYS_PER_WEEK_OPTIONS,
   PREVIOUS_TRANSPORT_OPTIONS,
 } from '../data/rentalForm';
+import { ciError, normalizeCi } from '../lib/validation';
 
 const EMPTY_FORM = {
   full_name: '',
@@ -48,11 +49,16 @@ export default function HomePage() {
       toast.error('Debés leer y aceptar los Términos y Condiciones');
       return;
     }
+    const ciValidationError = ciError(form.ci);
+    if (ciValidationError) {
+      toast.error(ciValidationError);
+      return;
+    }
     setSubmitting(true);
     try {
       const fd = new FormData();
       fd.append('full_name', form.full_name);
-      fd.append('ci', form.ci);
+      fd.append('ci', normalizeCi(form.ci));
       fd.append('email', form.email);
       fd.append('days_per_week', form.days_per_week);
       fd.append('previous_transport', form.previous_transport);
@@ -136,10 +142,12 @@ export default function HomePage() {
               <label className="block text-sm mb-1">CI:*</label>
               <input
                 type="text"
+                inputMode="numeric"
+                maxLength={8}
                 value={form.ci}
-                onChange={(e) => setForm({ ...form, ci: e.target.value })}
+                onChange={(e) => setForm({ ...form, ci: normalizeCi(e.target.value) })}
                 className="input-underline-navy"
-                placeholder=""
+                placeholder="8 dígitos"
                 required
               />
             </div>

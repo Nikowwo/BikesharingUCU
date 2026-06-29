@@ -2,6 +2,7 @@ const express = require('express');
 const db = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 const { calculateCo2Savings } = require('../services/co2Calculator');
+const { parseCi, parsePhone } = require('../utils/validation');
 
 const router = express.Router();
 
@@ -72,12 +73,22 @@ router.patch('/me', authenticateToken, async (req, res) => {
       values.push(email.trim());
     }
     if (phone !== undefined) {
+      const parsedPhone = parsePhone(phone);
+      if (parsedPhone === null) {
+        return res.status(400).json({
+          error: 'El teléfono debe tener entre 8 y 9 dígitos numéricos',
+        });
+      }
       updates.push('phone = ?');
-      values.push(phone?.trim() || null);
+      values.push(parsedPhone || null);
     }
     if (ci !== undefined) {
+      const parsedCi = parseCi(ci);
+      if (!parsedCi) {
+        return res.status(400).json({ error: 'La CI debe tener 8 dígitos numéricos' });
+      }
       updates.push('ci = ?');
-      values.push(ci?.trim() || null);
+      values.push(parsedCi);
     }
 
     if (updates.length === 0) {

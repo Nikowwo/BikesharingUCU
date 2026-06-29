@@ -25,6 +25,7 @@ const {
   sendAdminEmail,
   CONTACT_TO,
 } = require('../services/mailer');
+const { parseCi } = require('../utils/validation');
 
 const router = express.Router();
 
@@ -350,6 +351,11 @@ router.post('/rental', authenticateToken, upload.single('address_proof'), async 
       return res.status(400).json({ error: 'Nombre, CI y email son obligatorios' });
     }
 
+    const parsedCi = parseCi(ci);
+    if (!parsedCi) {
+      return res.status(400).json({ error: 'La CI debe tener 8 dígitos numéricos' });
+    }
+
     if (!req.file) {
       return res.status(400).json({ error: 'El comprobante de dirección es obligatorio' });
     }
@@ -398,7 +404,7 @@ router.post('/rental', authenticateToken, upload.single('address_proof'), async 
       [
         req.user.id,
         full_name.trim(),
-        ci.trim(),
+        parsedCi,
         email.trim(),
         daysPerWeek,
         transportKey,
@@ -410,7 +416,7 @@ router.post('/rental', authenticateToken, upload.single('address_proof'), async 
     const applicationId = result.insertId;
 
     await db.query('UPDATE users SET ci = ?, name = ? WHERE id = ?', [
-      ci.trim(),
+      parsedCi,
       full_name.trim(),
       req.user.id,
     ]);
@@ -423,7 +429,7 @@ router.post('/rental', authenticateToken, upload.single('address_proof'), async 
 Nueva solicitud de alquiler de bicicleta — BikeShare UCU
 
 Nombre completo: ${full_name.trim()}
-CI: ${ci.trim()}
+CI: ${parsedCi}
 Correo electrónico: ${email.trim()}
 Días a la facultad por semana: ${daysPerWeek}
 Distancia hasta la facultad: ${distanceKm} km
@@ -446,7 +452,7 @@ Fecha: ${new Date().toLocaleString('es-UY')}
         <p style="margin:0 0 16px;">BikeShare UCU</p>
         <table cellpadding="6" cellspacing="0" style="margin-bottom:20px;">
           <tr><td><strong>Nombre</strong></td><td>${full_name.trim()}</td></tr>
-          <tr><td><strong>CI</strong></td><td>${ci.trim()}</td></tr>
+          <tr><td><strong>CI</strong></td><td>${parsedCi}</td></tr>
           <tr><td><strong>Email</strong></td><td>${email.trim()}</td></tr>
           <tr><td><strong>Días/semana facultad</strong></td><td>${daysPerWeek}</td></tr>
           <tr><td><strong>Distancia (km)</strong></td><td>${distanceKm}</td></tr>

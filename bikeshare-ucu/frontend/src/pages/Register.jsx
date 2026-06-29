@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import LoginHero from '../components/LoginHero';
 import SiteHeader, { HEADER_OFFSET } from '../components/SiteHeader';
 import { useAuth, getLoginErrorMessage } from '../context/AuthContext';
+import { phoneError, normalizePhone } from '../lib/validation';
 
 export default function Register() {
   const { user, loading, register } = useAuth();
@@ -17,9 +18,17 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const phoneValidationError = phoneError(form.phone);
+    if (phoneValidationError) {
+      toast.error(phoneValidationError);
+      return;
+    }
     setSubmitting(true);
     try {
-      await register(form);
+      await register({
+        ...form,
+        phone: form.phone ? normalizePhone(form.phone) : '',
+      });
       toast.success('¡Cuenta creada!');
     } catch (err) {
       toast.error(getLoginErrorMessage(err));
@@ -38,17 +47,25 @@ export default function Register() {
             <h1 className="font-asap font-semibold text-heading-xl text-ucu-navy mb-6">Crear cuenta</h1>
             <form onSubmit={handleSubmit} className="space-y-4">
               {[
-                ['name', 'Nombre completo', 'text'],
-                ['email', 'Correo electrónico', 'email'],
-                ['phone', 'Teléfono (opcional)', 'tel'],
-              ].map(([key, label, type]) => (
+                ['name', 'Nombre completo', 'text', null],
+                ['email', 'Correo electrónico', 'email', null],
+                ['phone', 'Teléfono (opcional)', 'tel', 9],
+              ].map(([key, label, type, maxLen]) => (
                 <div key={key}>
                   <label className="block text-sm font-medium text-ucu-navy/80 mb-1">{label}</label>
                   <input
-                    type={type}
+                    type={key === 'phone' ? 'text' : type}
+                    inputMode={key === 'phone' ? 'numeric' : undefined}
+                    maxLength={maxLen ?? undefined}
                     value={form[key]}
-                    onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        [key]: key === 'phone' ? normalizePhone(e.target.value) : e.target.value,
+                      })
+                    }
                     className="input-field"
+                    placeholder={key === 'phone' ? '8 o 9 dígitos' : undefined}
                     required={key === 'name' || key === 'email'}
                   />
                 </div>

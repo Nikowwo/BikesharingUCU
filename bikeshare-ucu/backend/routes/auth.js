@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 const db = require('../db');
+const { parsePhone } = require('../utils/validation');
 
 const router = express.Router();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -46,10 +47,17 @@ router.post('/register', async (req, res) => {
     }
 
     const hash = await bcrypt.hash(password, 10);
+    const parsedPhone = parsePhone(phone);
+    if (parsedPhone === null) {
+      return res.status(400).json({
+        error: 'El teléfono debe tener entre 8 y 9 dígitos numéricos',
+      });
+    }
+
     const [result] = await db.query(
       `INSERT INTO users (name, email, password_hash, ci, phone, role)
        VALUES (?, ?, ?, ?, ?, 'user')`,
-      [name.trim(), email.trim(), hash, ci?.trim() || null, phone?.trim() || null]
+      [name.trim(), email.trim(), hash, ci?.trim() || null, parsedPhone || null]
     );
 
     const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [result.insertId]);

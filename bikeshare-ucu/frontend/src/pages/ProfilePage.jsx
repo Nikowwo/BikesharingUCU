@@ -5,14 +5,42 @@ import toast from 'react-hot-toast';
 import AppLayout from '../layouts/AppLayout';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useAuth } from '../context/AuthContext';
+import {
+  CI_LENGTH,
+  PHONE_MAX_LENGTH,
+  ciError,
+  phoneError,
+  normalizeCi,
+  normalizePhone,
+} from '../lib/validation';
 
-function EditableField({ label, value, field, onSave }) {
+function EditableField({ label, value, field, onSave, inputKind = 'text' }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value || '');
 
   const save = async () => {
+    let payload = draft;
+
+    if (inputKind === 'ci') {
+      const error = ciError(draft);
+      if (error) {
+        toast.error(error);
+        return;
+      }
+      payload = normalizeCi(draft);
+    }
+
+    if (inputKind === 'phone') {
+      const error = phoneError(draft);
+      if (error) {
+        toast.error(error);
+        return;
+      }
+      payload = normalizePhone(draft);
+    }
+
     try {
-      await onSave({ [field]: draft });
+      await onSave({ [field]: payload });
       toast.success('Actualizado');
       setEditing(false);
     } catch (err) {
@@ -27,7 +55,15 @@ function EditableField({ label, value, field, onSave }) {
         {editing ? (
           <input
             value={draft}
-            onChange={(e) => setDraft(e.target.value)}
+            onChange={(e) => {
+              let next = e.target.value;
+              if (inputKind === 'ci') next = normalizeCi(next);
+              if (inputKind === 'phone') next = normalizePhone(next);
+              setDraft(next);
+            }}
+            type="text"
+            inputMode="numeric"
+            maxLength={inputKind === 'ci' ? CI_LENGTH : inputKind === 'phone' ? PHONE_MAX_LENGTH : undefined}
             className="block w-full mt-1 input-field"
             autoFocus
           />
@@ -88,10 +124,17 @@ export default function ProfilePage() {
                 label="Teléfono"
                 value={user.phone}
                 field="phone"
+                inputKind="phone"
                 onSave={updateProfile}
               />
               <EditableField label="Mail" value={user.email} field="email" onSave={updateProfile} />
-              <EditableField label="CI" value={user.ci} field="ci" onSave={updateProfile} />
+              <EditableField
+                label="CI"
+                value={user.ci}
+                field="ci"
+                inputKind="ci"
+                onSave={updateProfile}
+              />
             </div>
             <button
               type="button"
