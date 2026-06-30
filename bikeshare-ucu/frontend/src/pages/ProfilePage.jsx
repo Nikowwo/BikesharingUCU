@@ -111,7 +111,7 @@ export default function ProfilePage() {
 
   return (
     <AppLayout className="page-bg-bikes">
-      <main className="min-h-[calc(100vh-7rem)] flex items-center justify-center px-4 py-12">
+      <main className="flex-1 flex items-center justify-center px-4 w-full">
         <div className="grid md:grid-cols-2 gap-6 max-w-4xl w-full">
           <div className="bg-ucu-card rounded-2xl p-8 shadow-xl">
             <h1 className="font-asap font-semibold text-heading-lg text-ucu-green text-center mb-6">Tu Perfil</h1>

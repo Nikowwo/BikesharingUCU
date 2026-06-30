@@ -59,7 +59,7 @@ export default function MyBikePage() {
   if (loading || fetching) {
     return (
       <AppLayout className="page-bg-bikes">
-        <main className="min-h-[calc(100vh-7rem)] flex items-center justify-center px-4 py-12">
+        <main className="flex-1 flex items-center justify-center px-4 w-full">
           <div
             className="bg-ucu-card rounded-2xl p-10 max-w-md w-full shadow-xl animate-pulse"
             aria-hidden="true"
@@ -81,7 +81,7 @@ export default function MyBikePage() {
   if (!bike) {
     return (
       <AppLayout className="page-bg-bikes">
-        <main className="min-h-[calc(100vh-7rem)] flex items-center justify-center px-4 py-12">
+        <main className="flex-1 flex items-center justify-center px-4 w-full">
           <div className="bg-ucu-card rounded-2xl p-10 max-w-md text-center shadow-xl">
             <h1 className="font-asap font-semibold text-heading-lg text-ucu-green mb-4">
               {pendingApp ? 'Solicitud en revisión' : 'Sin bici activa'}
@@ -128,7 +128,7 @@ export default function MyBikePage() {
 
   return (
     <AppLayout className="page-bg-bikes">
-      <main className="min-h-[calc(100vh-7rem)] flex items-center justify-center px-4 py-12">
+      <main className="flex-1 flex items-center justify-center px-4 w-full">
         <div className="max-w-4xl w-full space-y-6">
           <div className="grid md:grid-cols-2 gap-6 items-stretch">
             <div className="bg-ucu-card rounded-2xl p-8 shadow-xl flex flex-col">
